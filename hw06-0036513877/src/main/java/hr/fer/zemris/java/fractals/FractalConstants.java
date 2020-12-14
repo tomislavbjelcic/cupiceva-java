@@ -7,7 +7,7 @@ public class FractalConstants {
 	public static final double ROOT_TRESHOLD = 0.002;
 	
 	public static void main(String[] args) {
-		
+		System.out.println("oda");
 	}
 	
 }
