@@ -7,26 +7,66 @@ import hr.fer.zemris.math.ComplexRootedPolynomial;
 /**
  * Program koji od korisnika traži unos nultočaka kompleksnog polinoma i nakon toga iskoristi taj polinom za 
  * crtanje Newtonovog fraktala.<br>
- * Samo prikazivanje Newtonovog fraktala je paralelizirano, odnosno može se preko argumenata glavnog 
+ * Sam izračun Newtonove iteracije za prikaz fraktala je paralelizirano. 
+ * Može se preko argumenata glavnog programa specificirati koliko dretvi će sudjelovati u 
+ * izračunu i na koliko manjih poslova će rastaviti cjelokupni posao. 
  * 
  * @author Tomislav Bjelčić
  *
  */
 public class NewtonParallel {
 	
+	/**
+	 * Pomoćni razred koji predstavlja vrijednosti argumenata glavnog programa.
+	 * 
+	 * @author Tomislav Bjelčić
+	 *
+	 */
 	private static class Args {
+		/**
+		 * Pretpostavljeni broj dretvi.
+		 */
 		static final int WORKERS_DEFAULT
 			= Runtime.getRuntime().availableProcessors();
+		/**
+		 * Pretpostavljeni broj poslova.
+		 */
 		static final int TRACKS_DEFAULT = 4 * WORKERS_DEFAULT;
 		
+		/**
+		 * Dulji zapis argumenta za broj drevi.
+		 */
 		static final String WORKERS_ARG = "--workers";
+		/**
+		 * Kraći zapis argumenta za broj dretvi.
+		 */
 		static final String WORKERS_ARG_SHORT = "-w";
+		/**
+		 * Dulji zapis argumenta za broj poslova.
+		 */
 		static final String TRACKS_ARG = "--tracks";
+		/**
+		 * Kraći zapis argumenta za broj poslova.
+		 */
 		static final String TRACKS_ARG_SHORT = "-t";
 		
+		/**
+		 * Broj dretvi.
+		 */
 		int workers = WORKERS_DEFAULT;
+		/**
+		 * Broj poslova.
+		 */
 		int tracks = TRACKS_DEFAULT;
 		
+		/**
+		 * Preuzima argumente glavnog programa, parsira ih i stvara objekt ovog 
+		 * razreda sa postavljenim vrijednostima argumenata.
+		 * 
+		 * @param args argumenti glavnog programa.
+		 * @return instancu objekta ovog razreda sa postavljenim vrijednostima argumenata.
+		 * @throws IllegalArgumentException ako predani argumenti nisu ispravni.
+		 */
 		static Args parse(String[] args) {
 			boolean workersSpecified = false;
 			boolean tracksSpecified = false;
@@ -147,6 +187,16 @@ public class NewtonParallel {
 		}
 	}
 	
+	/**
+	 * Glavni program koji, nakon što je dohvaćen polinom koji se koristi za prikaz fraktala, 
+	 * obavlja poziv prikaznika fraktala.<br>
+	 * Prikaznik fraktala će pri tome koristiti implementaciju sučelja {@link IFractalProducer} koja koristi 
+	 * više dretvi i posao izračuna Newtonovih iteracija je podijeljen na više dijela. 
+	 * Broj dretvi i broj poslova se mogu specificirati preko argumenata {@code args}.
+	 * 
+	 * @param args argumenti glavnog programa u kojima se nalazi specifikacija parametara 
+	 * izračuna.
+	 */
 	public static void main(String[] args) {
 		Args arguments = null;
 		try {
@@ -156,8 +206,10 @@ public class NewtonParallel {
 			return;
 		}
 		
+		int w = arguments.workers;
+		int t = arguments.tracks;
 		ComplexRootedPolynomial crp = Newton.getPolynomialFromInput();
-		IFractalProducer producer = new ParallelFractalProducer(arguments.workers, arguments.tracks, crp);
+		IFractalProducer producer = new ParallelFractalProducer(w, t, crp);
 		FractalViewer.show(producer);
 	}
 	

@@ -6,12 +6,29 @@ import hr.fer.zemris.java.fractals.viewer.IFractalResultObserver;
 import hr.fer.zemris.math.ComplexRootedPolynomial;
 import static hr.fer.zemris.java.fractals.FractalConstants.*;
 
+/**
+ * Implementacija sučelja {@link IFractalProducer} koji koristi kompleksne polinome za 
+ * generiranje podataka o fraktalu i pri tome koristi jednu dretvu.
+ * 
+ * @author Tomislav Bjelčić
+ *
+ */
 public class SequentialFractalProducer extends AbstractFractalProducer {
 	
+	/**
+	 * Stvara novi generator podataka o fraktalu koristeći polinom {@code functionRooted}.
+	 * 
+	 * @param functionRooted polinom u faktoriziranom obliku.
+	 */
 	protected SequentialFractalProducer(ComplexRootedPolynomial functionRooted) {
 		super(functionRooted);
 	}
 
+	/**
+	 * Generira podatke kao polje short brojeva koje se koriste za vizualizaciju 
+	 * fraktala i generirani rezultat šalje promatraču {@code observer}.<br>
+	 * Prilikom izračuna generiranih podataka koristi se samo jedna dretva.
+	 */
 	@Override
 	public void produce(double reMin, double reMax, double imMin, double imMax,
 			int width, int height, 

@@ -9,8 +9,24 @@ import hr.fer.zemris.math.ComplexPolynomial;
 import hr.fer.zemris.math.ComplexRootedPolynomial;
 import static hr.fer.zemris.java.fractals.FractalConstants.*;
 
+/**
+ * Implementacija sučelja {@link IFractalProducer} koji koristi kompleksne polinome za 
+ * generiranje podataka o fraktalu.<br>
+ * Pri tome se sam zadatak generiranja podataka može podijeliti na proizvoljno mnogo 
+ * dijelova (poslova) koje će obavljati proizvoljno mnogo dretvi.
+ * 
+ * @author Tomislav Bjelčić
+ *
+ */
 public class ParallelFractalProducer extends AbstractFractalProducer {
 	
+	/**
+	 * Predstavlja model posla koji obavlja izračun podataka potrebnih za vizualizaciju 
+	 * fraktala.
+	 * 
+	 * @author Tomislav Bjelčić
+	 *
+	 */
 	private static class Job implements Runnable {
 		
 		double reMin;
@@ -61,15 +77,37 @@ public class ParallelFractalProducer extends AbstractFractalProducer {
 		
 	}
 	
+	/**
+	 * Broj dretvi koje obavljaju posao izračuna podataka.
+	 */
 	private int workers;
+	/**
+	 * Broj poslova (u smislu prikaza fraktala na rasteru: broj horizontalnih traka) 
+	 * koje obavljaju dretve kojih ima {@code workers}.
+	 */
 	private int tracks;
 	
+	/**
+	 * Stvara novi generator podataka o fraktalu koristeći polinom {@code functionRooted}, 
+	 * podjelu na {@code tracks} poslova i {@code workers} dretvi.
+	 * 
+	 * @param functionRooted polinom u faktoriziranom obliku.
+	 * @param tracks broj poslova.
+	 * @param workers broj dretvi.
+	 */
 	public ParallelFractalProducer(int workers, int tracks, ComplexRootedPolynomial crp) {
 		super(crp);
 		this.workers = workers;
 		this.tracks = tracks;
 	}
 	
+	/**
+	 * Generira podatke kao polje short brojeva koje se koriste za vizualizaciju 
+	 * fraktala i generirani rezultat šalje promatraču {@code observer}.<br>
+	 * Prilikom izračuna generiranih podataka koristi se onoliko mnogo dretvi koliko 
+	 * je specificirano prilikom stvaranja instance ovog razreda, i posao generiranja 
+	 * se isto tako dijeli na onoliko poslova koliko je specificirano.
+	 */
 	@Override
 	public void produce(double reMin, double reMax, double imMin, double imMax,
 			int width, int height, 

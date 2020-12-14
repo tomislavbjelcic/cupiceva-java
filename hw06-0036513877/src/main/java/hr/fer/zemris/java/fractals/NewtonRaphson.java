@@ -6,9 +6,23 @@ import hr.fer.zemris.math.Complex;
 import hr.fer.zemris.math.ComplexPolynomial;
 import hr.fer.zemris.math.ComplexRootedPolynomial;
 
+/**
+ * Razred koji sadrži jednu statičku metodu za izračun podataka o fraktalu 
+ * koristeći Newton-Raphsonovu metodu.
+ * 
+ * @author Tomislav Bjelčić
+ *
+ */
 public class NewtonRaphson {
 	
+	private NewtonRaphson() {}
 	
+	
+	/**
+	 * Računa podatke o fraktalu na temelju predanih parametara i 
+	 * puni polje {@code data} izračunatim podacima.
+	 * 
+	 */
 	public static void calculate​(
 			double reMin, 
 			double reMax, 
