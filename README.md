@@ -1,2 +1,0 @@
-# OPRPP1 homeworks
-
