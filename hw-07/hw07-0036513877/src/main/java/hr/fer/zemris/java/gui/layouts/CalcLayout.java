@@ -58,13 +58,15 @@ public class CalcLayout implements LayoutManager2 {
 		
 		for (Component c : comps) {
 			RCPosition pos = getConstraint(c);
+			if (pos == null)
+				continue;
 			
 			// dohvati dimenzije
 			Dimension min = Objects.requireNonNullElse(c.getMinimumSize(), zero);
 			Dimension pref = Objects.requireNonNullElse(c.getPreferredSize(), zero);
 			Dimension max = Objects.requireNonNullElse(c.getMaximumSize(), zero);
 			
-			if (pos != null && pos.equals(TOP_LEFT_POS)) {
+			if (pos.equals(TOP_LEFT_POS)) {
 				// uzmi u obzir samo dio sirine
 				min.width = ceil.applyAsInt(min.width - (TOP_LEFT_POS_COLSPAN - 1) * gap, TOP_LEFT_POS_COLSPAN);
 				pref.width = ceil.applyAsInt(pref.width - (TOP_LEFT_POS_COLSPAN - 1) * gap, TOP_LEFT_POS_COLSPAN);

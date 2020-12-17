@@ -19,7 +19,7 @@ public class DemoFrame2 extends JFrame {
 		initGUI();
 	}
 	private void initGUI() {
-		Container cp = getContentPane();cp.setLayout(new CalcLayout(3));
+		Container cp = getContentPane();cp.setLayout(new CalcLayout(10));
 		for (int i=1; i<=5; i++) {
 			for (int j=1; j<=7; j++) {
 				String text = "" + i + ", " + j;
