@@ -1,10 +1,15 @@
 package hr.fer.zemris.java.gui.calc.model;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.DoubleBinaryOperator;
 
 public class CalcModelImpl implements CalcModel {
+	
+	public static final DecimalFormat df1 = getDecimalFormat(1);
+	public static final DecimalFormat df2 = getDecimalFormat(0);
 	
 	private boolean editable = true;
 	
@@ -23,6 +28,19 @@ public class CalcModelImpl implements CalcModel {
 	
 	{
 		clearAll();
+	}
+	
+	private static DecimalFormat getDecimalFormat(int mandatoryDecimalCount) {
+		int maxNumberOfDecimals = 9;
+		char separator = '.';
+		String pattern = "0" + "." + "0".repeat(mandatoryDecimalCount) + "#".repeat(maxNumberOfDecimals-mandatoryDecimalCount);
+		DecimalFormat fmt = new DecimalFormat(pattern);
+	    DecimalFormatSymbols sym = DecimalFormatSymbols.getInstance();
+	    sym.setDecimalSeparator(separator);
+	    sym.setInfinity("Infinity");
+	    
+	    fmt.setDecimalFormatSymbols(sym);
+	    return fmt;
 	}
 	
 	private void notifyListeners() {
@@ -47,7 +65,7 @@ public class CalcModelImpl implements CalcModel {
 	@Override
 	public void setValue(double value) {
 		inputValue = value;
-		input = Double.toString(Math.abs(value));
+		input = df1.format(Math.abs(value));
 		if (Double.isNaN(value))
 			positive = true;
 		else {
@@ -78,6 +96,7 @@ public class CalcModelImpl implements CalcModel {
 	public void clearAll() {
 		clearActiveOperand();
 		setPendingBinaryOperation(null);
+		freezeValue(null);
 		clear();
 	}
 
@@ -112,6 +131,8 @@ public class CalcModelImpl implements CalcModel {
 		
 		if (inputValue == 0.0 && digit == 0 && !dotPresent) {
 			leadingZero = true;
+			frozen = null;
+			notifyListeners();
 			return;
 		}
 		String addedDigit = input.concat(Integer.toString(digit));

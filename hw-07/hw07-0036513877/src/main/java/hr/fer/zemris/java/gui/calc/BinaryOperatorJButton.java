@@ -1,16 +1,15 @@
 package hr.fer.zemris.java.gui.calc;
 
-import java.util.function.DoubleUnaryOperator;
+import java.util.function.DoubleBinaryOperator;
 
-
-public class UnaryOperatorJButton extends OperatorJButton {
+public class BinaryOperatorJButton extends OperatorJButton {
 	
-	private DoubleUnaryOperator originalOperator;
-	private DoubleUnaryOperator reversedOperator;
+	private DoubleBinaryOperator originalOperator;
+	private DoubleBinaryOperator reversedOperator;
 	
-	private DoubleUnaryOperator currentOperator;
+	private DoubleBinaryOperator currentOperator;
 	
-	public UnaryOperatorJButton(DoubleUnaryOperator originalOperator, DoubleUnaryOperator reversedOperator,
+	public BinaryOperatorJButton(DoubleBinaryOperator originalOperator, DoubleBinaryOperator reversedOperator,
 			String originalOperatorText, String reversedOperatorText) {
 		super(originalOperatorText, reversedOperatorText);
 		this.originalOperator = originalOperator;
@@ -23,12 +22,8 @@ public class UnaryOperatorJButton extends OperatorJButton {
 		currentOperator = original ? originalOperator : reversedOperator;
 	}
 	
-	public DoubleUnaryOperator getUnaryOperator() {
+	public DoubleBinaryOperator getBinaryOperator() {
 		return currentOperator;
 	}
-
-	
-	
-	
 	
 }

@@ -1,6 +1,7 @@
 package hr.fer.zemris.java.gui.layouts;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.awt.Dimension;
 
@@ -33,6 +34,31 @@ public class CalcLayoutTest {
 		Dimension actual = p.getPreferredSize();
 		Dimension expected = new Dimension(152, 158);
 		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testAddLayoutComponentIllegalConstraint() {
+		String[] illegalConstraints = {"0,4", "0,0", "2,8", "-4,3", "10,10",
+										"1,2", "1,3", "1,4", "1,5"};
+		
+		for (String c : illegalConstraints) {
+			assertThrows(CalcLayoutException.class, ()->{
+				JPanel p = new JPanel(new CalcLayout());
+				p.add(new JLabel(), c);
+			});
+		}
+	}
+	
+	@Test
+	public void testAddLayoutComponentSameConstraint() {
+		assertThrows(CalcLayoutException.class, () -> {
+			String valid = "2,2";
+			JPanel p = new JPanel(new CalcLayout());
+			JLabel l1 = new JLabel();
+			JLabel l2 = new JLabel();
+			p.add(l1, valid);
+			p.add(l2, valid);
+		});
 	}
 	
 	
