@@ -80,7 +80,6 @@ public class CalculatorFrame extends JFrame {
 	public CalculatorFrame() {
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setSize(1000, 500);
-		this.setLocation(100, 100);
 		initGUI();
 	}
 	
