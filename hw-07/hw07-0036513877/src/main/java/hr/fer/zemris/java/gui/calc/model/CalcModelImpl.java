@@ -8,8 +8,7 @@ import java.util.function.DoubleBinaryOperator;
 
 public class CalcModelImpl implements CalcModel {
 	
-	public static final DecimalFormat df1 = getDecimalFormat(1);
-	public static final DecimalFormat df2 = getDecimalFormat(0);
+	private static final DecimalFormat df1 = getDecimalFormat(1);
 	
 	private boolean editable = true;
 	
