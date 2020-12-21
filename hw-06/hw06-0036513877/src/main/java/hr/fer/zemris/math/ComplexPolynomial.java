@@ -95,7 +95,7 @@ public class ComplexPolynomial {
 		if (coefCount == 1)
 			return new ComplexPolynomial(Complex.ZERO);
 		
-		// polinom je stupnja barem 1
+		// polinom je stupnja barem jedan
 		Complex[] derivedCoefs = new Complex[coefCount - 1];
 		for (int k=1; k<coefCount; k++) {
 			Complex coef = coefs[k].multiply(new Complex(k, 0));
