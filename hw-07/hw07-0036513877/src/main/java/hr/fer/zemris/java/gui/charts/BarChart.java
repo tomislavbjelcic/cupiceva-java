@@ -1,7 +1,5 @@
 package hr.fer.zemris.java.gui.charts;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -81,33 +79,6 @@ public class BarChart {
 	
 	public int getyStep() {
 		return yStep;
-	}
-
-	public static void main(String[] args) {
-		/*
-		BarChart model = new BarChart(
-				Arrays.asList(
-						new XYValue(1,8), new XYValue(2,20), new XYValue(3,22),
-						new XYValue(10,10), new XYValue(5,4)
-						),
-				"Number of people in the car",
-				"Frequency",
-				1,
-				// y-os kreće od 0
-				26,
-				// y-os ide do 22
-				5
-				);
-		*/
-		Path p = Paths.get("chart.txt");
-		BarChart model = BarChartLoader.loadFromFile(p);
-		
-		System.out.println(model.getXyValues());
-		System.out.println(model.getyMin());
-		System.out.println(model.getyMax());
-		System.out.println(model.getyDesc());
-		System.out.println(model.getxDesc());
-		System.out.println(model.getyStep());
 	}
 
 }

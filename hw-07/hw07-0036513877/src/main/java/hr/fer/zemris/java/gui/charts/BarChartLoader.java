@@ -62,17 +62,4 @@ public class BarChartLoader {
 		
 	}
 	
-	public static void main(String[] args) {
-		String regex = "\\s*";
-		String str = "o,d a m ajnu m,.\tk";
-		int c = 0;
-		try (Scanner sc = new Scanner(str)) {
-			while (sc.hasNext()) {
-				c++;
-				System.out.println(sc.next());
-			}
-		}
-		System.out.println(c);
-	}
-	
 }
