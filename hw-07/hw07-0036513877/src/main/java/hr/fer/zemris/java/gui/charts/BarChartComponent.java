@@ -57,9 +57,9 @@ public class BarChartComponent extends JComponent {
 		g2d.drawString(xDesc, l+w/2-xDescW/2, t+h-desc);
 		
 		
-		int textValueGap = 30;
+		int textValueGap = 20;
 		int vyGap = 15;
-		int vxGap = 20;
+		int vxGap = 8;
 		int notch = 5;
 		int colGap = 1;
 		int topGap = 5;
@@ -72,9 +72,9 @@ public class BarChartComponent extends JComponent {
 		int yMaxStrW = fm.stringWidth(yMaxStr);
 		
 		int offx = l+asc+desc+textValueGap+vyGap+yMaxStrW;
-		int offy = t+h-desc-asc-textValueGap-vxGap;
+		int offy = t+h-desc-asc-textValueGap-vxGap-desc-asc;
 		int ytr = topGap+trside+t;
-		g2d.drawLine(offx, offy, offx, ytr);
+		g2d.drawLine(offx, offy+notch, offx, ytr);
 		int tr = trside/2;
 		Polygon triangleY = new Polygon(new int[]{offx-tr, offx+tr, offx}, 
 				new int[]{ytr, ytr, ytr-trside}, 3);
@@ -91,7 +91,7 @@ public class BarChartComponent extends JComponent {
 		Util.distributeEvenly(heights, offy-(ytr+trgap));
 		int cols = xyValues.size();
 		int[] widths = new int[cols];
-		Util.distributeEvenly(widths, xtr-trgap-offx);
+		Util.distributeEvenly(widths, xtr-trgap-offx-cols*colGap);
 		
 		int[] cumulativeHeights = new int[rows+1];
 		for (int i=0, ch=0; i<=rows; i++) {
@@ -112,8 +112,32 @@ public class BarChartComponent extends JComponent {
 		
 		int[] posx = new int[cols];
 		for (int i=0, px=offx+1; i<cols; i++) {
-			int rx = px;
+			XYValue xyv = xyValues.get(i);
+			int y = xyv.getY();
+			int x = xyv.getX();
 			
+			int yidx = y - yMin;
+			int barHeight = yidx > rows ? cumulativeHeights[rows] + trgap + trside
+					: cumulativeHeights[y - yMin];
+			int barWidth = widths[i];
+			if (barHeight > yMin) {
+				int rx = px;
+				int ry = offy - barHeight;
+				Color before = g2d.getColor();
+				g2d.setColor(BAR_COLOR);
+				g2d.fillRect(rx, ry, barWidth, barHeight);
+				g2d.setColor(before);
+			}
+			
+			int pxNext = px + barWidth;
+			g2d.drawLine(pxNext, offy, pxNext, offy+notch);
+			String xstr = Integer.toString(x);
+			int xstrW = fm.stringWidth(xstr);
+			int xb = px + barWidth/2;
+			int yb = offy + vxGap + asc;
+			g2d.drawString(xstr, xb, yb);
+			
+			px = pxNext + colGap;
 		}
 	}
 	
