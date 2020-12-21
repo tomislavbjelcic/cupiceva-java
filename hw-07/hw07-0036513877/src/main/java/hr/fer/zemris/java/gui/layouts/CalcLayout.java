@@ -167,35 +167,11 @@ public class CalcLayout implements LayoutManager2 {
 		int cols = MAX_COL;
 		int w = parentDim.width - (l+r+(cols-1)*gap);
 		int h = parentDim.height - (t+b+(rows-1)*gap);
-		int wcolFloor = w / cols;
-		int hrowFloor = h / rows;
-		double werr = Math.abs(((double) w) / cols - wcolFloor);
-		double herr = Math.abs(((double) h) / rows - hrowFloor);
-		Double one = 1.0;
-		double o = 1.0;
 		
 		int[] colWidths = new int[cols];
+		Util.distributeEvenly(colWidths, w);
 		int[] rowHeights = new int[rows];
-		double err = 0;
-		for (int i=0; i<cols; i++) {
-			err += werr;
-			int val = wcolFloor;
-			if (dblCmp.compare(err, one) >= 0) {
-				err = Math.abs(err - o);
-				val++;
-			}
-			colWidths[i] = val;
-		}
-		err = 0;
-		for (int i=0; i<rows; i++) {
-			err += herr;
-			int val = hrowFloor;
-			if (dblCmp.compare(err, one) >= 0) {
-				err = Math.abs(err - o);
-				val++;
-			}
-			rowHeights[i] = val;
-		}
+		Util.distributeEvenly(rowHeights, h);
 		
 		Rectangle[][] bounds = new Rectangle[rows][cols];
 		int cumulativeH = t; 

@@ -23,6 +23,7 @@ public class BarChartDemo extends JFrame {
 		
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.setSize(500, 500);
+		this.setTitle("Bar chart viewer");
 		initGUI();
 	}
 	
