@@ -4,6 +4,8 @@ import java.util.Objects;
 
 public class Util {
 	
+	private Util() {}
+	
 	public static void distributeEvenly(int[] arr, int total) {
 		if (total <= 0)
 			return;

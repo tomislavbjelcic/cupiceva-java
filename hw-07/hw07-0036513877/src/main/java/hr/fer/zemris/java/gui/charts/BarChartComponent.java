@@ -16,7 +16,7 @@ import hr.fer.zemris.java.gui.layouts.Util;
 
 public class BarChartComponent extends JComponent {
 	
-	private static final Color BAR_COLOR = Color.RED;
+	private static final Color BAR_COLOR = new Color(77, 166, 255);
 	
 	private BarChart chart;
 	
