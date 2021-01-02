@@ -1,7 +1,6 @@
 package local.example;
 
 import java.awt.FlowLayout;
-import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
@@ -17,7 +16,7 @@ public class Prozor extends JFrame {
 
 	private FormLocalizationProvider flp;
 
-	public Prozor() throws HeadlessException {
+	public Prozor() {
 		flp = new FormLocalizationProvider(LocalizationProvider.getInstance(), this);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setTitle("Demo");
