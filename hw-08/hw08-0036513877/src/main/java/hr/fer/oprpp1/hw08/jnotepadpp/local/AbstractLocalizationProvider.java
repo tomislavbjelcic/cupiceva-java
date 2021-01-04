@@ -1,4 +1,4 @@
-package local.example;
+package hr.fer.oprpp1.hw08.jnotepadpp.local;
 
 import java.util.LinkedList;
 import java.util.List;

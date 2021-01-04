@@ -10,20 +10,39 @@ import java.util.Objects;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeListener;
 
+import hr.fer.oprpp1.hw08.jnotepadpp.util.LocalizedUtils;
+
 public class DefaultMultipleDocumentModel extends JTabbedPane implements MultipleDocumentModel {
 	
+	private static final String UNNAMED_DOCNAME = "(unnamed)";
 	private List<SingleDocumentModel> docs = new ArrayList<>();
 	private List<MultipleDocumentListener> listeners = new LinkedList<>();
-	private SingleDocumentModel currentDocument;
+	private SingleDocumentModel currentDocument = null;
+	private int currentDocumentIndex = -1;
+	/**
+	 * Metoda ovog promatrača se aktivira svaki put kada se indeks aktivnog taba promijeni.<br>
+	 * On je zadužen za pozivanje metode {@code notifyCurrentDocumentChanged} unutar ovog razreda.
+	 */
+	private final ChangeListener activeTabIndexChangeListener = e -> {
+		currentDocumentIndex = this.getSelectedIndex();
+		if (currentDocumentIndex == -1) {	// maknut je jedini tab
+			SingleDocumentModel prev = currentDocument;
+			currentDocument = null;
+			this.notifyCurrentDocumentChanged(prev, currentDocument);
+			return;
+		}
+		
+		SingleDocumentModel activeIndexDoc = docs.get(currentDocumentIndex);
+		if (activeIndexDoc == currentDocument)
+			return;
+		
+		SingleDocumentModel prev = currentDocument;
+		currentDocument = activeIndexDoc;
+		this.notifyCurrentDocumentChanged(prev, currentDocument);
+	};
 	
 	public DefaultMultipleDocumentModel() {
-		
-		ChangeListener cl = changeEvent -> {
-			int sel = this.getSelectedIndex();
-			System.out.println("Selected: " + sel);
-		};
-		this.addChangeListener(cl);
-		
+		this.addChangeListener(activeTabIndexChangeListener);
 	}
 	
 	private void notifyCurrentDocumentChanged(SingleDocumentModel prev, 
@@ -46,15 +65,21 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 
 	@Override
 	public SingleDocumentModel createNewDocument() {
-		SingleDocumentModel newDoc = new DefaultSingleDocumentModel();
-		SingleDocumentModel oldDoc = currentDocument;
+		return this.newDoc(null, "");
+	}
+	
+	private SingleDocumentModel newDoc(Path path, String content) {
+		boolean exist = path != null;
+		SingleDocumentModel newDoc = new DefaultSingleDocumentModel(path, content);
+
 		docs.add(newDoc);
-		currentDocument = newDoc;
-		this.addTab("lol"+(this.getNumberOfDocuments()-1), newDoc.getTextComponent());
-		this.setSelectedIndex(this.getNumberOfDocuments()-1);
 		this.notifyDocumentAdded(newDoc);
-		this.notifyCurrentDocumentChanged(oldDoc, newDoc);
-		return newDoc;
+		String docName = exist ? path.getFileName().toString() : UNNAMED_DOCNAME;
+		this.addTab(docName, newDoc.getTextComponent());
+
+		int lastIndex = this.getNumberOfDocuments() - 1;
+		this.setSelectedIndex(lastIndex);	// ovo će aktivirati ChangeListener koji će onda ažurirati trenutni dokument
+		return null;
 	}
 
 	@Override
@@ -64,10 +89,27 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 
 	@Override
 	public SingleDocumentModel loadDocument(Path path) {
-		// TODO Auto-generated method stub
-		return null;
+		path = Objects.requireNonNull(path).toAbsolutePath().normalize();
+		int possibleDocIndex = documentIndexForPath(path);
+		if (possibleDocIndex != -1) {
+			this.setSelectedIndex(possibleDocIndex);
+			return currentDocument;
+		}
+		
+		String docStr = LocalizedUtils.readString(path);
+		return this.newDoc(path, docStr);
 	}
-
+	
+	private int documentIndexForPath(Path path) {
+		for (int i=0, len=this.getNumberOfDocuments(); i<len; i++) {
+			SingleDocumentModel d = docs.get(i);
+			Path docPath = d.getFilePath();
+			if (path.equals(docPath))
+				return i;
+		}
+		return -1;
+	}
+	
 	@Override
 	public void saveDocument(SingleDocumentModel model, Path newPath) {
 		// TODO Auto-generated method stub
@@ -76,25 +118,14 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 
 	@Override
 	public void closeDocument(SingleDocumentModel model) {
-		int idx = docs.indexOf(model);
+		int idx = docs.indexOf(Objects.requireNonNull(model));
 		if (idx == -1)
 			throw new IllegalArgumentException("Nepostojeći dokument");
 		
 		docs.remove(idx);
-		this.removeTabAt(idx);
 		this.notifyDocumentRemoved(model);
-		if (model != currentDocument)
-			return;
 		
-		int count = this.getNumberOfDocuments();
-		SingleDocumentModel newModel = null;
-		int newIdx = idx==count ? idx-1 : idx;
-		if (count > 0) {
-			newModel = this.getDocument(newIdx);
-		}
-		this.setSelectedIndex(newIdx);
-		currentDocument = newModel;
-		this.notifyCurrentDocumentChanged(model, newModel);
+		this.removeTabAt(idx); // ako je došlo do promjene trenutnog dokumenta, aktivirati će se activeTabIndexChangeListener
 	}
 
 	@Override

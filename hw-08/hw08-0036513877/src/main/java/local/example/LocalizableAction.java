@@ -5,6 +5,8 @@ import java.util.Objects;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 
+import hr.fer.oprpp1.hw08.jnotepadpp.local.ILocalizationProvider;
+
 public abstract class LocalizableAction extends AbstractAction {
 	
 	protected ILocalizationProvider provider;

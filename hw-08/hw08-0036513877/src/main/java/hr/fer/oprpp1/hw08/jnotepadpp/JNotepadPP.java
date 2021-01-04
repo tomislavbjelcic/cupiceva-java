@@ -2,14 +2,19 @@ package hr.fer.oprpp1.hw08.jnotepadpp;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Dimension;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import hr.fer.oprpp1.hw08.jnotepadpp.models.DefaultMultipleDocumentModel;
+import hr.fer.oprpp1.hw08.jnotepadpp.models.MultipleDocumentListener;
 import hr.fer.oprpp1.hw08.jnotepadpp.models.MultipleDocumentModel;
+import hr.fer.oprpp1.hw08.jnotepadpp.models.SingleDocumentModel;
 
 public class JNotepadPP extends JFrame {
 	
@@ -23,32 +28,56 @@ public class JNotepadPP extends JFrame {
 		Container cp = this.getContentPane();
 		cp.setLayout(new BorderLayout());
 		
+		JPanel panel = new JPanel();
+		JButton remTabBtn = new JButton("Ukloni");
+		JTextField tf = new JTextField();
+		Dimension tfpref = tf.getPreferredSize();
+		tfpref.width = 50;
+		tf.setPreferredSize(tfpref);
+		panel.add(tf); panel.add(remTabBtn);
+		cp.add(panel, BorderLayout.PAGE_START);
 		
-		DefaultMultipleDocumentModel m = new DefaultMultipleDocumentModel();
-		cp.add(m, BorderLayout.CENTER);
-		MultipleDocumentModel mdm = m;
+		JButton addTabBtn = new JButton("Dodaj");
+		cp.add(addTabBtn, BorderLayout.PAGE_END);
 		
-		JButton addBtn = new JButton("nova");
-		addBtn.addActionListener(e -> mdm.createNewDocument());
-		cp.add(addBtn, BorderLayout.PAGE_END);
-		
-		JButton remSel = new JButton("izbrisi odabranu");
-		remSel.addActionListener(e -> mdm.closeDocument(mdm.getDocument(m.getSelectedIndex())));
-		cp.add(remSel, BorderLayout.PAGE_START);
-		
-		/*
-		JTabbedPane tp = new JTabbedPane();
-		tp.addTab("od", new JButton("aa"));
-		tp.addTab("oddada", new JButton("aafff"));
-		tp.addChangeListener(e -> System.out.println(e));
-		cp.add(tp, BorderLayout.CENTER);
-		
-		JButton b = new JButton("lmaobruh");
-		b.addActionListener(e -> {
-			tp.removeTabAt(0);
+		DefaultMultipleDocumentModel paneModel = new DefaultMultipleDocumentModel();
+		MultipleDocumentModel model = paneModel;
+		model.addMultipleDocumentListener(new MultipleDocumentListener() {
+
+			@Override
+			public void currentDocumentChanged(SingleDocumentModel previousModel, SingleDocumentModel currentModel) {
+				System.out.println("cdc");
+			}
+
+			@Override
+			public void documentAdded(SingleDocumentModel model) {
+				System.out.println("docAdded");
+			}
+
+			@Override
+			public void documentRemoved(SingleDocumentModel model) {
+				System.out.println("docRemoved");
+			}
+			
 		});
-		cp.add(b, BorderLayout.PAGE_END);
-		*/
+		
+		cp.add(paneModel, BorderLayout.CENTER);
+		
+		remTabBtn.addActionListener(e -> {
+			String input = tf.getText();
+			if (input.isBlank()) {
+				System.out.println("Blank input");
+				return;
+			}
+			int idx = Integer.parseInt(input);
+			SingleDocumentModel doc = model.getDocument(idx);
+			model.closeDocument(doc);
+		});
+		
+		addTabBtn.addActionListener(e -> {
+			model.createNewDocument();
+		});
+		
 	}
 	
 	public static void main(String[] args) {

@@ -12,6 +12,10 @@ import javax.swing.JMenuItem;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import hr.fer.oprpp1.hw08.jnotepadpp.local.FormLocalizationProvider;
+import hr.fer.oprpp1.hw08.jnotepadpp.local.ILocalizationProvider;
+import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizationProvider;
+
 public class Prozor extends JFrame {
 
 	private FormLocalizationProvider flp;

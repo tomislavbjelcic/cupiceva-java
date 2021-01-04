@@ -1,4 +1,4 @@
-package local.example;
+package hr.fer.oprpp1.hw08.jnotepadpp.local;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -11,7 +11,7 @@ public class LocalizationProvider extends AbstractLocalizationProvider {
 	private ResourceBundle bundle;
 	
 	private static final String DEFAULT_LANG = "en";
-	private static final String RES = "local.example.prijevodi";
+	private static final String RES = "hr.fer.oprpp1.hw08.jnotepadpp.local.prijevodi";
 	
 	private LocalizationProvider() {
 		setLang(DEFAULT_LANG);
@@ -39,6 +39,8 @@ public class LocalizationProvider extends AbstractLocalizationProvider {
 		return bundle.getString(key);
 	}
 	
-	
+	public static void main(String[] args) {
+		
+	}
 	
 }
