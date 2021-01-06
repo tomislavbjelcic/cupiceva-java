@@ -1,20 +1,19 @@
 package hr.fer.oprpp1.hw08.jnotepadpp;
 
-import java.awt.BorderLayout;
 import java.awt.Container;
-import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
 
-import javax.swing.JButton;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.Icon;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
-import hr.fer.oprpp1.hw08.jnotepadpp.models.DefaultMultipleDocumentModel;
-import hr.fer.oprpp1.hw08.jnotepadpp.models.MultipleDocumentListener;
-import hr.fer.oprpp1.hw08.jnotepadpp.models.MultipleDocumentModel;
-import hr.fer.oprpp1.hw08.jnotepadpp.models.SingleDocumentModel;
+import hr.fer.oprpp1.hw08.jnotepadpp.components.CloseTabButton;
+import hr.fer.oprpp1.hw08.jnotepadpp.icons.SaveIcons;
 
 public class JNotepadPP extends JFrame {
 	
@@ -26,57 +25,23 @@ public class JNotepadPP extends JFrame {
 	
 	private void initGUI() {
 		Container cp = this.getContentPane();
-		cp.setLayout(new BorderLayout());
+		cp.setLayout(new FlowLayout());
 		
-		JPanel panel = new JPanel();
-		JButton remTabBtn = new JButton("Ukloni");
-		JTextField tf = new JTextField();
-		Dimension tfpref = tf.getPreferredSize();
-		tfpref.width = 50;
-		tf.setPreferredSize(tfpref);
-		panel.add(tf); panel.add(remTabBtn);
-		cp.add(panel, BorderLayout.PAGE_START);
-		
-		JButton addTabBtn = new JButton("Dodaj");
-		cp.add(addTabBtn, BorderLayout.PAGE_END);
-		
-		DefaultMultipleDocumentModel paneModel = new DefaultMultipleDocumentModel();
-		MultipleDocumentModel model = paneModel;
-		model.addMultipleDocumentListener(new MultipleDocumentListener() {
+		Action ac = new AbstractAction() {
 
 			@Override
-			public void currentDocumentChanged(SingleDocumentModel previousModel, SingleDocumentModel currentModel) {
-				System.out.println("cdc");
-			}
-
-			@Override
-			public void documentAdded(SingleDocumentModel model) {
-				System.out.println("docAdded");
-			}
-
-			@Override
-			public void documentRemoved(SingleDocumentModel model) {
-				System.out.println("docRemoved");
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				System.out.println("o");
 			}
 			
-		});
+		};
 		
-		cp.add(paneModel, BorderLayout.CENTER);
+		CloseTabButton ctb = new CloseTabButton(ac);
+		Icon icon = SaveIcons.RED_SAVE_ICON;
 		
-		remTabBtn.addActionListener(e -> {
-			String input = tf.getText();
-			if (input.isBlank()) {
-				System.out.println("Blank input");
-				return;
-			}
-			int idx = Integer.parseInt(input);
-			SingleDocumentModel doc = model.getDocument(idx);
-			model.closeDocument(doc);
-		});
+		cp.add(new JLabel(icon));
 		
-		addTabBtn.addActionListener(e -> {
-			model.createNewDocument();
-		});
 		
 	}
 	

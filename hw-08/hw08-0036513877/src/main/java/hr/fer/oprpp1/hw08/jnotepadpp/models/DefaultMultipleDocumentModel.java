@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeListener;
 
@@ -75,7 +76,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		docs.add(newDoc);
 		this.notifyDocumentAdded(newDoc);
 		String docName = exist ? path.getFileName().toString() : UNNAMED_DOCNAME;
-		this.addTab(docName, newDoc.getTextComponent());
+		this.addTab(docName, new JScrollPane(newDoc.getTextComponent()));
 
 		int lastIndex = this.getNumberOfDocuments() - 1;
 		this.setSelectedIndex(lastIndex);	// ovo će aktivirati ChangeListener koji će onda ažurirati trenutni dokument
