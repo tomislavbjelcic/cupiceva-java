@@ -31,8 +31,14 @@ public class LocalizedUtils {
 	
 	public static void checkFileWritable(Path file) {
 		checkFile(file);
-		if (!Files.isReadable(file))
+		if (!Files.isWritable(file))
 			throw new IllegalArgumentException(provider.getString("err_file_not_writable") + ": " + file.toString());
+	}
+	
+	public static void checkWrite(Path file) {
+		Objects.requireNonNull(file);
+		if (Files.exists(file))
+			checkFileWritable(file);
 	}
 	
 	public static String readString(Path file) {
@@ -44,9 +50,20 @@ public class LocalizedUtils {
 			throw new RuntimeException(provider.getString("err_file_load") + ": " + file.toString());
 		}
 		return str;
-	}	
+	}
+	
+	public static void writeString(Path file, String str) {
+		Objects.requireNonNull(str);
+		checkWrite(file);
+		try {
+			Files.writeString(file, str);
+		} catch (IOException ex) {
+			throw new RuntimeException(provider.getString("err_file_write") + ": " + file.toString());
+		}
+	}
+	
 	public static void main(String[] args) {
-		Path p = Path.of("nepostoji");
+		Path p = Path.of("/huhuuhuha.tx");
 		boolean exists = Files.exists(p); System.out.println("Exists: " + exists);
 		boolean isRegularFile = Files.isRegularFile(p); System.out.println("Regular file: " + isRegularFile);
 		boolean isDir = Files.isDirectory(p); System.out.println("Directory: " + isDir);
@@ -55,6 +72,7 @@ public class LocalizedUtils {
 		System.out.println(provider.getString("err_file_not_regular"));
 		//String s = readString(p);
 		//System.out.println(s);
+		
 	}
 	
 }
