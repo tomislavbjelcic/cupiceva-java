@@ -41,20 +41,20 @@ public class LocalizedUtils {
 		try {
 			str = Files.readString(file);
 		} catch (IOException | OutOfMemoryError ex) {
-			throw new RuntimeException(provider.getString("err_file_load" + ": " + file.toString()));
+			throw new RuntimeException(provider.getString("err_file_load") + ": " + file.toString());
 		}
 		return str;
 	}	
 	public static void main(String[] args) {
-		Path p = Path.of("pom.xml");
+		Path p = Path.of("nepostoji");
 		boolean exists = Files.exists(p); System.out.println("Exists: " + exists);
 		boolean isRegularFile = Files.isRegularFile(p); System.out.println("Regular file: " + isRegularFile);
 		boolean isDir = Files.isDirectory(p); System.out.println("Directory: " + isDir);
 		boolean isReadable = Files.isReadable(p); System.out.println("Readable: " + isReadable);
 		boolean isWritable = Files.isWritable(p); System.out.println("Writable: " + isWritable);
 		System.out.println(provider.getString("err_file_not_regular"));
-		String s = readString(p);
-		System.out.println(s);
+		//String s = readString(p);
+		//System.out.println(s);
 	}
 	
 }

@@ -79,7 +79,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 
 		int lastIndex = this.getNumberOfDocuments() - 1;
 		this.setSelectedIndex(lastIndex);	// ovo će aktivirati ChangeListener koji će onda ažurirati trenutni dokument
-		return null;
+		return newDoc;
 	}
 
 	@Override
