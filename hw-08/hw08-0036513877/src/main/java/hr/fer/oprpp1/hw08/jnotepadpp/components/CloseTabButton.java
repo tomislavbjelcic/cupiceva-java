@@ -12,25 +12,28 @@ import javax.swing.JButton;
 
 public class CloseTabButton extends JButton {
 	
-	private static final Dimension PREF_SIZE = new Dimension(15, 15);
+	private static final Dimension PREF_SIZE = new Dimension(13, 13);
 	private static final Color BG = new Color(255, 157, 150);
 	private final MouseListener mouseListener = new MouseAdapter() {
 		CloseTabButton ctb = CloseTabButton.this;
 		@Override
 		public void mouseEntered(MouseEvent e) {
 			ctb.setOpaque(true);
-			ctb.setBorderPainted(true);
 		}
 		
 		@Override
 		public void mouseExited(MouseEvent e) {
 			ctb.setOpaque(false);
-			ctb.setBorderPainted(false);
 		}
 	};
 	
-	public CloseTabButton(Action ac) {
-		super(ac);
+	@Override
+	public void setAction(Action ac) {
+		super.setAction(ac);
+		this.setText("X");
+	}
+	
+	public CloseTabButton() {
 		initComponent();
 	}
 	
@@ -38,7 +41,7 @@ public class CloseTabButton extends JButton {
 		this.setText("X");
 		this.setPreferredSize(PREF_SIZE);
 		this.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-		this.setBorderPainted(false);
+		this.setBorderPainted(true);
 		this.setFocusable(false);
 		this.setOpaque(false);
 		this.setBackground(BG);

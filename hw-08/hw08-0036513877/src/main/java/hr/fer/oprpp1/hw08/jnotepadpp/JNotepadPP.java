@@ -1,19 +1,20 @@
 package hr.fer.oprpp1.hw08.jnotepadpp;
 
+import java.awt.BorderLayout;
 import java.awt.Container;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
+import java.awt.Dimension;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
-import hr.fer.oprpp1.hw08.jnotepadpp.components.CloseTabButton;
-import hr.fer.oprpp1.hw08.jnotepadpp.icons.SaveIcons;
+import hr.fer.oprpp1.hw08.jnotepadpp.models.DefaultMultipleDocumentModel;
+import hr.fer.oprpp1.hw08.jnotepadpp.models.MultipleDocumentListener;
+import hr.fer.oprpp1.hw08.jnotepadpp.models.MultipleDocumentModel;
+import hr.fer.oprpp1.hw08.jnotepadpp.models.SingleDocumentModel;
 
 public class JNotepadPP extends JFrame {
 	
@@ -25,7 +26,61 @@ public class JNotepadPP extends JFrame {
 	
 	private void initGUI() {
 		Container cp = this.getContentPane();
-		cp.setLayout(new FlowLayout());
+		cp.setLayout(new BorderLayout());
+		
+		JPanel panel = new JPanel();
+		JButton remTabBtn = new JButton("Ukloni");
+		JTextField tf = new JTextField();
+		Dimension tfpref = tf.getPreferredSize();
+		tfpref.width = 50;
+		tf.setPreferredSize(tfpref);
+		panel.add(tf); panel.add(remTabBtn);
+		cp.add(panel, BorderLayout.PAGE_START);
+		
+		JButton addTabBtn = new JButton("Dodaj");
+		cp.add(addTabBtn, BorderLayout.PAGE_END);
+		
+		DefaultMultipleDocumentModel paneModel = new DefaultMultipleDocumentModel();
+		MultipleDocumentModel model = paneModel;
+		model.addMultipleDocumentListener(new MultipleDocumentListener() {
+
+			@Override
+			public void currentDocumentChanged(SingleDocumentModel previousModel, SingleDocumentModel currentModel) {
+				System.out.println("cdc");
+			}
+
+			@Override
+			public void documentAdded(SingleDocumentModel model) {
+				System.out.println("docAdded");
+			}
+
+			@Override
+			public void documentRemoved(SingleDocumentModel model) {
+				System.out.println("docRemoved");
+			}
+			
+		});
+		
+		cp.add(paneModel, BorderLayout.CENTER);
+		
+		remTabBtn.addActionListener(e -> {
+			String input = tf.getText();
+			if (input.isBlank()) {
+				System.out.println("Blank input");
+				return;
+			}
+			int idx = Integer.parseInt(input);
+			SingleDocumentModel doc = model.getDocument(idx);
+			model.closeDocument(doc);
+		});
+		
+		addTabBtn.addActionListener(e -> {
+			model.createNewDocument();
+		});
+
+		/*
+		Container cp = this.getContentPane();
+		cp.setLayout(new FlowLayout(FlowLayout.LEFT, 3, 3));
 		
 		Action ac = new AbstractAction() {
 
@@ -41,6 +96,9 @@ public class JNotepadPP extends JFrame {
 		Icon icon = SaveIcons.RED_SAVE_ICON;
 		
 		cp.add(new JLabel(icon));
+		cp.add(new JLabel("README"));
+		cp.add(ctb);
+		*/
 		
 		
 	}
