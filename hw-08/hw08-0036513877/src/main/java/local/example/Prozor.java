@@ -12,6 +12,7 @@ import javax.swing.JMenuItem;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import hr.fer.oprpp1.hw08.jnotepadpp.actions.LocalizableAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.FormLocalizationProvider;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.ILocalizationProvider;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizationProvider;
@@ -32,15 +33,18 @@ public class Prozor extends JFrame {
 		getContentPane().setLayout(new FlowLayout());
 
 
-
-		JButton gumbYes = new JButton(new LocalizableAction(flp, "yes") {
+		LocalizableAction acY = new LocalizableAction(flp) {
 			@Override
 			public void actionPerformed(ActionEvent e) {}
-		});
-		JButton gumbNo = new JButton(new LocalizableAction(flp, "no") {
+		};
+		acY.putLocalizedValue(Action.NAME, "yes");
+		LocalizableAction acN = new LocalizableAction(flp) {
 			@Override
 			public void actionPerformed(ActionEvent e) {}
-		});
+		};
+		acN.putLocalizedValue(Action.NAME, "no");
+		JButton gumbYes = new JButton(acY);
+		JButton gumbNo = new JButton(acN);
 		getContentPane().add(gumbYes);
 		getContentPane().add(gumbNo);
 
@@ -49,23 +53,28 @@ public class Prozor extends JFrame {
 
 	private void createMenuBar() {
 		JMenuBar menuBar = new JMenuBar();
-
-		JMenu fileMenu = new JMenu(new LocalizableAction(flp, "language") {
+		
+		LocalizableAction acFileMenu = new LocalizableAction(flp) {
 			@Override
 			public void actionPerformed(ActionEvent e) {}
-		});
+		};
+		acFileMenu.putLocalizedValue(Action.NAME, "language");
+		JMenu fileMenu = new JMenu(acFileMenu);
 		menuBar.add(fileMenu);
 
 		class LAbstractAction extends LocalizableAction {
 			
+			private String lng;
 
-			public LAbstractAction(ILocalizationProvider provider, String key) {
-				super(provider, key);
+			public LAbstractAction(ILocalizationProvider provider, String lng) {
+				super(provider);
+				this.lng = lng;
+				this.putLocalizedValue(Action.NAME, lng);
 			}
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				LocalizationProvider.getInstance().setLanguage(key);
+				LocalizationProvider.getInstance().setLanguage(lng);
 			}
 
 		}

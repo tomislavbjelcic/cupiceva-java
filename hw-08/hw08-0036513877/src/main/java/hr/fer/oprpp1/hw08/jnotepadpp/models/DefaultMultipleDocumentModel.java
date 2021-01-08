@@ -1,6 +1,5 @@
 package hr.fer.oprpp1.hw08.jnotepadpp.models;
 
-import java.awt.event.ActionEvent;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -8,17 +7,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeListener;
 
+import hr.fer.oprpp1.hw08.jnotepadpp.actions.CloseTabAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.components.TabComponent;
+import hr.fer.oprpp1.hw08.jnotepadpp.local.ILocalizationProvider;
 import hr.fer.oprpp1.hw08.jnotepadpp.util.LocalizedUtils;
 
 public class DefaultMultipleDocumentModel extends JTabbedPane implements MultipleDocumentModel {
 	
+	private ILocalizationProvider provider; // za close akcije
 	private List<SingleDocumentModel> docs = new ArrayList<>();
 	private List<MultipleDocumentListener> listeners = new LinkedList<>();
 	private SingleDocumentModel currentDocument = null;
@@ -45,8 +46,9 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		this.notifyCurrentDocumentChanged(prev, currentDocument);
 	};
 	
-	public DefaultMultipleDocumentModel() {
+	public DefaultMultipleDocumentModel(ILocalizationProvider provider) {
 		this.addChangeListener(activeTabIndexChangeListener);
+		this.provider = Objects.requireNonNull(provider);
 	}
 	
 	private void notifyCurrentDocumentChanged(SingleDocumentModel prev, 
@@ -82,14 +84,8 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		this.addTab(docName, new JScrollPane(newDoc.getTextComponent()));
 
 		int lastIndex = this.getNumberOfDocuments() - 1;
-		Action ac = new AbstractAction() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				System.out.println("pokusaj zatvaranja " + lastIndex);
-			}
-		}; //stvoriti prikladnu akciju
-		TabComponent tc = new TabComponent(newDoc);
-		tc.setCloseTabAction(ac);
+		Action ac = new CloseTabAction(null, provider, this, newDoc);
+		TabComponent tc = new TabComponent(this, newDoc, ac);
 		this.setTabComponentAt(lastIndex, tc);
 		this.setSelectedIndex(lastIndex);	// ovo će aktivirati ChangeListener koji će onda ažurirati trenutni dokument
 		return newDoc;

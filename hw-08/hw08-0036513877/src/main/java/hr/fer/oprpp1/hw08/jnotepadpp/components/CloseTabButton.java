@@ -27,13 +27,8 @@ public class CloseTabButton extends JButton {
 		}
 	};
 	
-	@Override
-	public void setAction(Action ac) {
-		super.setAction(ac);
-		this.setText("X");
-	}
-	
-	public CloseTabButton() {
+	public CloseTabButton(Action ac) {
+		super(ac);
 		initComponent();
 	}
 	

@@ -39,8 +39,4 @@ public class LocalizationProvider extends AbstractLocalizationProvider {
 		return bundle.getString(key);
 	}
 	
-	public static void main(String[] args) {
-		
-	}
-	
 }

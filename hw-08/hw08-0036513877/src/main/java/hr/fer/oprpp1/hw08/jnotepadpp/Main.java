@@ -1,18 +1,28 @@
 package hr.fer.oprpp1.hw08.jnotepadpp;
 
-import java.util.ArrayList;
-import java.util.List;
+class A {
+	void m() {
+		System.out.println("ma");
+	}
+}
+
+class B extends A {
+	@Override
+	void m() {
+		super.m();
+		System.out.println("mb");
+	}
+	
+	void lel() {
+		super.m();
+	}
+}
 
 public class Main {
 	
 	public static void main(String[] args) {
-		List<Object> l = new ArrayList<>();
-		l.add(null);
-		l.add(3);
-		l.add(null);
-		l.add("lmao");
-		l.add(new ArrayList<Object>(l));
-		System.out.println(l);
+		B b = new B();
+		b.lel();
 	}
 	
 }

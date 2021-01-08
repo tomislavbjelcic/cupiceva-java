@@ -11,6 +11,9 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import hr.fer.oprpp1.hw08.jnotepadpp.actions.CreateNewDocumentAction;
+import hr.fer.oprpp1.hw08.jnotepadpp.local.FormLocalizationProvider;
+import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizationProvider;
 import hr.fer.oprpp1.hw08.jnotepadpp.models.DefaultMultipleDocumentModel;
 import hr.fer.oprpp1.hw08.jnotepadpp.models.MultipleDocumentListener;
 import hr.fer.oprpp1.hw08.jnotepadpp.models.MultipleDocumentModel;
@@ -18,7 +21,10 @@ import hr.fer.oprpp1.hw08.jnotepadpp.models.SingleDocumentModel;
 
 public class JNotepadPP extends JFrame {
 	
+	private FormLocalizationProvider flp;
+	
 	public JNotepadPP() {
+		flp = new FormLocalizationProvider(LocalizationProvider.getInstance(), this);
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.setSize(500, 500);
 		this.initGUI();
@@ -37,10 +43,8 @@ public class JNotepadPP extends JFrame {
 		panel.add(tf); panel.add(remTabBtn);
 		cp.add(panel, BorderLayout.PAGE_START);
 		
-		JButton addTabBtn = new JButton("Dodaj");
-		cp.add(addTabBtn, BorderLayout.PAGE_END);
 		
-		DefaultMultipleDocumentModel paneModel = new DefaultMultipleDocumentModel();
+		DefaultMultipleDocumentModel paneModel = new DefaultMultipleDocumentModel(flp);
 		MultipleDocumentModel model = paneModel;
 		model.addMultipleDocumentListener(new MultipleDocumentListener() {
 
@@ -74,9 +78,9 @@ public class JNotepadPP extends JFrame {
 			model.closeDocument(doc);
 		});
 		
-		addTabBtn.addActionListener(e -> {
-			model.createNewDocument();
-		});
+		JButton addTabBtn = new JButton(new CreateNewDocumentAction(this, flp, model));
+		cp.add(addTabBtn, BorderLayout.PAGE_END);
+		
 
 		/*
 		Container cp = this.getContentPane();
