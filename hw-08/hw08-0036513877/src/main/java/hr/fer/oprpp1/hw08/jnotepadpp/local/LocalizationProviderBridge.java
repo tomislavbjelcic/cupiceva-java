@@ -21,6 +21,7 @@ public class LocalizationProviderBridge extends AbstractLocalizationProvider {
 			return;
 		connected = true;
 		provider.addLocalizationListener(singleListener);
+		//System.out.println("connected");
 		String providerLang = provider.getCurrentLanguage();
 		if (!Objects.equals(providerLang, lastKnownLanguage))
 			fire();
@@ -30,6 +31,7 @@ public class LocalizationProviderBridge extends AbstractLocalizationProvider {
 		if (!connected)
 			return;
 		connected = false;
+		//System.out.println("disconnected");
 		provider.removeLocalizationListener(singleListener);
 	}
 

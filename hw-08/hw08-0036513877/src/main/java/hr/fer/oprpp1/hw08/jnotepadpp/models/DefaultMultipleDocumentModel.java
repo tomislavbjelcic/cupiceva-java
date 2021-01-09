@@ -12,6 +12,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeListener;
 
+import hr.fer.oprpp1.hw08.jnotepadpp.JNotepadPP;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.CloseTabAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.components.TabComponent;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.ILocalizationProvider;
@@ -19,6 +20,7 @@ import hr.fer.oprpp1.hw08.jnotepadpp.util.LocalizedUtils;
 
 public class DefaultMultipleDocumentModel extends JTabbedPane implements MultipleDocumentModel {
 	
+	private JNotepadPP parent;	// za close akcije
 	private ILocalizationProvider provider; // za close akcije
 	private List<SingleDocumentModel> docs = new ArrayList<>();
 	private List<MultipleDocumentListener> listeners = new LinkedList<>();
@@ -46,9 +48,10 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		this.notifyCurrentDocumentChanged(prev, currentDocument);
 	};
 	
-	public DefaultMultipleDocumentModel(ILocalizationProvider provider) {
+	public DefaultMultipleDocumentModel(JNotepadPP parent, ILocalizationProvider provider) {
 		this.addChangeListener(activeTabIndexChangeListener);
 		this.provider = Objects.requireNonNull(provider);
+		this.parent = Objects.requireNonNull(parent);
 	}
 	
 	private void notifyCurrentDocumentChanged(SingleDocumentModel prev, 
@@ -84,7 +87,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		this.addTab(docName, new JScrollPane(newDoc.getTextComponent()));
 
 		int lastIndex = this.getNumberOfDocuments() - 1;
-		Action ac = new CloseTabAction(null, provider, this, newDoc);
+		Action ac = new CloseTabAction(parent, provider, this, newDoc);
 		TabComponent tc = new TabComponent(this, newDoc, ac);
 		this.setTabComponentAt(lastIndex, tc);
 		this.setSelectedIndex(lastIndex);	// ovo će aktivirati ChangeListener koji će onda ažurirati trenutni dokument

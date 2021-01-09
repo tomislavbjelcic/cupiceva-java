@@ -36,7 +36,7 @@ public class SaveAsDocumentAction extends JNotepadPPAction {
 		Path selectedPath = jfc.getSelectedFile().toPath();
 		if (Files.exists(selectedPath)) {
 			String fileName = selectedPath.getFileName().toString();
-			String msg = String.format("%s \"%s\" %s.\n%s",
+			String msg = String.format("%s \"%s\" %s.\n%s?",
 					provider.getString("prompt_overwrite_part1"),
 					fileName,
 					provider.getString("prompt_overwrite_part2"),
@@ -50,7 +50,7 @@ public class SaveAsDocumentAction extends JNotepadPPAction {
 					frame, 
 					msg, 
 					"", 
-					JOptionPane.YES_NO_OPTION,
+					JOptionPane.YES_NO_CANCEL_OPTION,
 					JOptionPane.QUESTION_MESSAGE,
 					null, options, options[1]);
 			if (d == JOptionPane.NO_OPTION || d == JOptionPane.CLOSED_OPTION)

@@ -3,6 +3,8 @@ package hr.fer.oprpp1.hw08.jnotepadpp;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.Action;
 import javax.swing.JFrame;
@@ -13,19 +15,25 @@ import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import hr.fer.oprpp1.hw08.jnotepadpp.actions.CloseDocumentAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.CreateNewDocumentAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.LocalizableAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.OpenDocumentAction;
+import hr.fer.oprpp1.hw08.jnotepadpp.actions.QuitAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.SaveAsDocumentAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.SaveDocumentAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.FormLocalizationProvider;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.ILocalizationProvider;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizationProvider;
 import hr.fer.oprpp1.hw08.jnotepadpp.models.DefaultMultipleDocumentModel;
+import hr.fer.oprpp1.hw08.jnotepadpp.models.MultipleDocumentAdapter;
+import hr.fer.oprpp1.hw08.jnotepadpp.models.MultipleDocumentListener;
 import hr.fer.oprpp1.hw08.jnotepadpp.models.MultipleDocumentModel;
+import hr.fer.oprpp1.hw08.jnotepadpp.models.SingleDocumentModel;
 
 public class JNotepadPP extends JFrame {
 	
+	private static final String APP_NAME = "JNotepad++";
 	private FormLocalizationProvider flp;
 	private MultipleDocumentModel model;
 	
@@ -40,7 +48,7 @@ public class JNotepadPP extends JFrame {
 	
 	public JNotepadPP() {
 		flp = new FormLocalizationProvider(LocalizationProvider.getInstance(), this);
-		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		this.setSize(1000, 700);
 		this.initGUI();
 	}
@@ -49,8 +57,24 @@ public class JNotepadPP extends JFrame {
 		Container cp = this.getContentPane();
 		cp.setLayout(new BorderLayout());
 		
-		DefaultMultipleDocumentModel jTabbedPane = new DefaultMultipleDocumentModel(flp);
+		DefaultMultipleDocumentModel jTabbedPane = new DefaultMultipleDocumentModel(this, flp);
 		this.model = jTabbedPane;
+		MultipleDocumentListener mdl = new MultipleDocumentAdapter() {
+			@Override
+			public void currentDocumentChanged(SingleDocumentModel previousModel, SingleDocumentModel currentModel) {
+				String title = currentModel == null ? APP_NAME :
+					(currentModel.getFullPathString() + " - " + APP_NAME);
+				JNotepadPP.this.setTitle(title);
+			}
+		};
+		mdl.currentDocumentChanged(null, null);
+		this.model.addMultipleDocumentListener(mdl);
+		this.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				quitAction.actionPerformed(null);
+			}
+		});
 		cp.add(jTabbedPane, BorderLayout.CENTER);
 		
 		this.createActions();
@@ -112,6 +136,8 @@ public class JNotepadPP extends JFrame {
 		this.openAction = new OpenDocumentAction(this, flp, model);
 		this.saveAction = new SaveDocumentAction(this, flp, model);
 		this.saveAsAction = new SaveAsDocumentAction(this, flp, model);
+		this.closeAction = new CloseDocumentAction(this, flp, model);
+		this.quitAction = new QuitAction(this, flp, model);
 	}
 	
 	private void createMenus() {
@@ -134,8 +160,16 @@ public class JNotepadPP extends JFrame {
 		fileMenu.addSeparator();
 		fileMenu.add(new JMenuItem(saveAction));
 		fileMenu.add(new JMenuItem(saveAsAction));
+		fileMenu.addSeparator();
+		fileMenu.add(new JMenuItem(closeAction));
+		fileMenu.addSeparator();
+		fileMenu.add(new JMenuItem(quitAction));
 
 		this.setJMenuBar(menuBar);
+	}
+	
+	public Action getSaveAction() {
+		return saveAction;
 	}
 	
 	private void createToolBars() {
