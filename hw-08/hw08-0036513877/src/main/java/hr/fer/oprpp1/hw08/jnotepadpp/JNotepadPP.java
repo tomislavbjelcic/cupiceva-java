@@ -2,31 +2,46 @@ package hr.fer.oprpp1.hw08.jnotepadpp;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
-import java.awt.Dimension;
+import java.awt.event.ActionEvent;
 
-import javax.swing.JButton;
+import javax.swing.Action;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.CreateNewDocumentAction;
+import hr.fer.oprpp1.hw08.jnotepadpp.actions.LocalizableAction;
+import hr.fer.oprpp1.hw08.jnotepadpp.actions.OpenDocumentAction;
+import hr.fer.oprpp1.hw08.jnotepadpp.actions.SaveAsDocumentAction;
+import hr.fer.oprpp1.hw08.jnotepadpp.actions.SaveDocumentAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.FormLocalizationProvider;
+import hr.fer.oprpp1.hw08.jnotepadpp.local.ILocalizationProvider;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizationProvider;
 import hr.fer.oprpp1.hw08.jnotepadpp.models.DefaultMultipleDocumentModel;
-import hr.fer.oprpp1.hw08.jnotepadpp.models.MultipleDocumentListener;
 import hr.fer.oprpp1.hw08.jnotepadpp.models.MultipleDocumentModel;
-import hr.fer.oprpp1.hw08.jnotepadpp.models.SingleDocumentModel;
 
 public class JNotepadPP extends JFrame {
 	
 	private FormLocalizationProvider flp;
+	private MultipleDocumentModel model;
+	
+	private Action newDocAction;
+	private Action openAction;
+	private Action saveAction;
+	private Action saveAsAction;
+	private Action closeAction;
+	private Action quitAction;
+	
+	private JToolBar toolBar;
 	
 	public JNotepadPP() {
 		flp = new FormLocalizationProvider(LocalizationProvider.getInstance(), this);
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		this.setSize(500, 500);
+		this.setSize(1000, 700);
 		this.initGUI();
 	}
 	
@@ -34,6 +49,14 @@ public class JNotepadPP extends JFrame {
 		Container cp = this.getContentPane();
 		cp.setLayout(new BorderLayout());
 		
+		DefaultMultipleDocumentModel jTabbedPane = new DefaultMultipleDocumentModel(flp);
+		this.model = jTabbedPane;
+		cp.add(jTabbedPane, BorderLayout.CENTER);
+		
+		this.createActions();
+		this.createMenus();
+		
+		/*
 		JPanel panel = new JPanel();
 		JButton remTabBtn = new JButton("Ukloni");
 		JTextField tf = new JTextField();
@@ -80,30 +103,42 @@ public class JNotepadPP extends JFrame {
 		
 		JButton addTabBtn = new JButton(new CreateNewDocumentAction(this, flp, model));
 		cp.add(addTabBtn, BorderLayout.PAGE_END);
-		
-
-		/*
-		Container cp = this.getContentPane();
-		cp.setLayout(new FlowLayout(FlowLayout.LEFT, 3, 3));
-		
-		Action ac = new AbstractAction() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				System.out.println("o");
-			}
-			
-		};
-		
-		CloseTabButton ctb = new CloseTabButton(ac);
-		Icon icon = SaveIcons.RED_SAVE_ICON;
-		
-		cp.add(new JLabel(icon));
-		cp.add(new JLabel("README"));
-		cp.add(ctb);
 		*/
 		
+	}
+	
+	private void createActions() {
+		this.newDocAction = new CreateNewDocumentAction(this, flp, model);
+		this.openAction = new OpenDocumentAction(this, flp, model);
+		this.saveAction = new SaveDocumentAction(this, flp, model);
+		this.saveAsAction = new SaveAsDocumentAction(this, flp, model);
+	}
+	
+	private void createMenus() {
+		JMenuBar menuBar = new JMenuBar();
+		class MenuAction extends LocalizableAction {
+			public MenuAction(ILocalizationProvider provider, String nameKey) {
+				super(provider);
+				this.putLocalizedValue(Action.NAME, nameKey);
+			}
+			@Override
+			public void actionPerformed(ActionEvent e) {}
+			
+		}
+
+		JMenu fileMenu = new JMenu(new MenuAction(flp, "file"));
+		menuBar.add(fileMenu);
+
+		fileMenu.add(new JMenuItem(newDocAction));
+		fileMenu.add(new JMenuItem(openAction));
+		fileMenu.addSeparator();
+		fileMenu.add(new JMenuItem(saveAction));
+		fileMenu.add(new JMenuItem(saveAsAction));
+
+		this.setJMenuBar(menuBar);
+	}
+	
+	private void createToolBars() {
 		
 	}
 	

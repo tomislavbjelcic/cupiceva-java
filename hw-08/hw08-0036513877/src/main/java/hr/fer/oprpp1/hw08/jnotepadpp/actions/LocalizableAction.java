@@ -6,16 +6,29 @@ import java.util.Objects;
 
 import javax.swing.AbstractAction;
 
+import hr.fer.oprpp1.hw08.jnotepadpp.local.ILocalizationListener;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.ILocalizationProvider;
 
 public abstract class LocalizableAction extends AbstractAction {
 	
-	private ILocalizationProvider provider;
+	protected ILocalizationProvider provider;
 	private Map<String, String> actionKeysToTranslationKeysMap = new HashMap<>();
+	private ILocalizationListener localizationListener = this::update;
+	private boolean trackingLocalizationChanges = false;
 	
 	public LocalizableAction(ILocalizationProvider provider) {
 		this.provider = Objects.requireNonNull(provider);
-		this.provider.addLocalizationListener(this::update);
+		this.trackLocalizationChanges(true);
+	}
+	
+	public void trackLocalizationChanges(boolean track) {
+		if (trackingLocalizationChanges == track)
+			return;
+		this.trackingLocalizationChanges = track;
+		if (track)
+			provider.addLocalizationListener(localizationListener);
+		else
+			provider.removeLocalizationListener(localizationListener);
 	}
 	
 	private void update() {

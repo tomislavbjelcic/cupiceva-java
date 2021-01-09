@@ -1,5 +1,6 @@
 package hr.fer.oprpp1.hw08.jnotepadpp.models;
 
+import java.awt.Font;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,7 +13,7 @@ import javax.swing.event.DocumentListener;
 public class DefaultSingleDocumentModel implements SingleDocumentModel {
 	
 	private Path filePath;
-	private JTextArea textComponent = new JTextArea();
+	private JTextArea textComponent;
 	private boolean modified = false;
 	private List<SingleDocumentListener> listeners = new LinkedList<>();
 	
@@ -20,9 +21,12 @@ public class DefaultSingleDocumentModel implements SingleDocumentModel {
 		this(null, "");
 	}
 	
-	public DefaultSingleDocumentModel(Path filePath, String content) {
-		this.setFilePath(filePath);
-		
+	private void initTextComponent(String content) {
+		textComponent = new JTextArea();
+		Font orig = textComponent.getFont();
+		Font mono = new Font(Font.MONOSPACED, orig.getStyle(), orig.getSize())
+				.deriveFont(1.5f * orig.getSize());
+		textComponent.setFont(mono);
 		textComponent.setText(Objects.requireNonNull(content));
 		textComponent.getDocument().addDocumentListener(new DocumentListener() {
 			@Override
@@ -35,7 +39,11 @@ public class DefaultSingleDocumentModel implements SingleDocumentModel {
 			public void changedUpdate(DocumentEvent e) {}
 			
 		});
-		
+	}
+	
+	public DefaultSingleDocumentModel(Path filePath, String content) {
+		this.setFilePath(filePath);
+		initTextComponent(content);
 	}
 	
 	private void notifyModified() {

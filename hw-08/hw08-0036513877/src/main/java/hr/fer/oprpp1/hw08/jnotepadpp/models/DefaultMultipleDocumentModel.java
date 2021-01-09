@@ -132,6 +132,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		
 		if (docPathChanged)
 			model.setFilePath(savePath);
+		model.setModified(false);
 	}
 
 	@Override

@@ -5,7 +5,11 @@ import java.util.Objects;
 public class LocalizationProviderBridge extends AbstractLocalizationProvider {
 	
 	private ILocalizationProvider provider;
-	private ILocalizationListener singleListener = this::fire;
+	private ILocalizationListener singleListener = () -> {
+		lastKnownLanguage = provider.getCurrentLanguage();
+		fire();
+	};
+	private String lastKnownLanguage;
 	private boolean connected;
 	
 	public LocalizationProviderBridge(ILocalizationProvider provider) {
@@ -17,6 +21,9 @@ public class LocalizationProviderBridge extends AbstractLocalizationProvider {
 			return;
 		connected = true;
 		provider.addLocalizationListener(singleListener);
+		String providerLang = provider.getCurrentLanguage();
+		if (!Objects.equals(providerLang, lastKnownLanguage))
+			fire();
 	}
 	
 	public void disconnect() {
@@ -29,6 +36,11 @@ public class LocalizationProviderBridge extends AbstractLocalizationProvider {
 	@Override
 	public String getString(String key) {
 		return provider.getString(key);
+	}
+
+	@Override
+	public String getCurrentLanguage() {
+		return lastKnownLanguage;
 	}
 	
 	

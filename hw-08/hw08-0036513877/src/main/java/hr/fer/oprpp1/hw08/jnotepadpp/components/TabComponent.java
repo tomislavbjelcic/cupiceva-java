@@ -4,7 +4,6 @@ import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.nio.file.Path;
 import java.util.Objects;
 
 import javax.swing.Action;
@@ -14,12 +13,12 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import hr.fer.oprpp1.hw08.jnotepadpp.icons.SaveIcons;
+import hr.fer.oprpp1.hw08.jnotepadpp.models.SingleDocumentAdapter;
 import hr.fer.oprpp1.hw08.jnotepadpp.models.SingleDocumentListener;
 import hr.fer.oprpp1.hw08.jnotepadpp.models.SingleDocumentModel;
 
 public class TabComponent extends JPanel {
 	
-	private static final String UNNAMED_DOCNAME = "(unnamed)";
 	private JTabbedPane parent;
 	private SingleDocumentModel model;
 	private JLabel saveIconLabel;
@@ -47,7 +46,7 @@ public class TabComponent extends JPanel {
 	}
 	
 	private void initListeners() {
-		SingleDocumentListener l = new SingleDocumentListener() {
+		SingleDocumentListener l = new SingleDocumentAdapter() {
 
 			@Override
 			public void documentModifyStatusUpdated(SingleDocumentModel model) {
@@ -83,24 +82,14 @@ public class TabComponent extends JPanel {
 	}
 	
 	private void updatePathLabel(SingleDocumentModel model) {
-		String filePathStr = getFileNameFromModel(model);
+		String filePathStr = model.getFileName();
 		fileNameLabel.setText(filePathStr);
-		String fullPathStr = getFullPathString(model);
+		String fullPathStr = model.getFullPathString();
 		fileNameLabel.setToolTipText(fullPathStr);
 	}
 	
 	public void setCloseTabAction(Action ac) {
 		closeBtn.setAction(ac);
-	}
-	
-	private static String getFullPathString(SingleDocumentModel model) {
-		Path p = model.getFilePath();
-		return p == null ? UNNAMED_DOCNAME : p.toString();
-	}
-	
-	private static String getFileNameFromModel(SingleDocumentModel model) {
-		Path modelFilePath = model.getFilePath();
-		return modelFilePath == null ? UNNAMED_DOCNAME : modelFilePath.getFileName().toString();
 	}
 	
 	private static ImageIcon getIconFromModel(SingleDocumentModel model) {
