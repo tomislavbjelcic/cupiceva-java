@@ -15,13 +15,16 @@ import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import hr.fer.oprpp1.hw08.jnotepadpp.actions.Clipboard;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.CloseDocumentAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.CreateNewDocumentAction;
+import hr.fer.oprpp1.hw08.jnotepadpp.actions.LanguageChangeAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.LocalizableAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.OpenDocumentAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.QuitAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.SaveAsDocumentAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.SaveDocumentAction;
+import hr.fer.oprpp1.hw08.jnotepadpp.actions.StatisticalInfoAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.FormLocalizationProvider;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.ILocalizationProvider;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizationProvider;
@@ -34,6 +37,7 @@ import hr.fer.oprpp1.hw08.jnotepadpp.models.SingleDocumentModel;
 public class JNotepadPP extends JFrame {
 	
 	private static final String APP_NAME = "JNotepad++";
+	private static final LocalizationProvider lp = LocalizationProvider.getInstance();
 	private FormLocalizationProvider flp;
 	private MultipleDocumentModel model;
 	
@@ -44,10 +48,15 @@ public class JNotepadPP extends JFrame {
 	private Action closeAction;
 	private Action quitAction;
 	
+	private Action statInfoAction;
+	
+	
+	private static final String[] languages = {"en", "hr"};
+	
 	private JToolBar toolBar;
 	
 	public JNotepadPP() {
-		flp = new FormLocalizationProvider(LocalizationProvider.getInstance(), this);
+		flp = new FormLocalizationProvider(lp, this);
 		this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		this.setSize(1000, 700);
 		this.initGUI();
@@ -138,11 +147,13 @@ public class JNotepadPP extends JFrame {
 		this.saveAsAction = new SaveAsDocumentAction(this, flp, model);
 		this.closeAction = new CloseDocumentAction(this, flp, model);
 		this.quitAction = new QuitAction(this, flp, model);
+		this.statInfoAction = new StatisticalInfoAction(this, flp, model);
 	}
 	
 	private void createMenus() {
 		JMenuBar menuBar = new JMenuBar();
 		class MenuAction extends LocalizableAction {
+			
 			public MenuAction(ILocalizationProvider provider, String nameKey) {
 				super(provider);
 				this.putLocalizedValue(Action.NAME, nameKey);
@@ -150,11 +161,11 @@ public class JNotepadPP extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {}
 			
+			
 		}
 
 		JMenu fileMenu = new JMenu(new MenuAction(flp, "file"));
 		menuBar.add(fileMenu);
-
 		fileMenu.add(new JMenuItem(newDocAction));
 		fileMenu.add(new JMenuItem(openAction));
 		fileMenu.addSeparator();
@@ -164,6 +175,22 @@ public class JNotepadPP extends JFrame {
 		fileMenu.add(new JMenuItem(closeAction));
 		fileMenu.addSeparator();
 		fileMenu.add(new JMenuItem(quitAction));
+		
+		JMenu editMenu = new JMenu(new MenuAction(flp, "edit"));
+		menuBar.add(editMenu);
+		Clipboard clipboard = new Clipboard(this, flp, model);
+		editMenu.add(new JMenuItem(clipboard.getCopyAction()));
+		editMenu.add(new JMenuItem(clipboard.getCutAction()));
+		editMenu.add(new JMenuItem(clipboard.getPasteAction()));
+		
+		JMenu toolsMenu = new JMenu(new MenuAction(flp, "tools"));
+		menuBar.add(toolsMenu);
+		toolsMenu.add(new JMenuItem(statInfoAction));
+		
+		JMenu langMenu = new JMenu(new MenuAction(flp, "language"));
+		menuBar.add(langMenu);
+		for (String lang : languages)
+			langMenu.add(new JMenuItem(new LanguageChangeAction(flp, lp, lang)));
 
 		this.setJMenuBar(menuBar);
 	}

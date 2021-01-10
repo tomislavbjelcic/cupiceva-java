@@ -20,5 +20,4 @@ public abstract class JNotepadPPAction extends LocalizableAction {
 	}
 	
 	protected abstract void initAction();
-	
 }

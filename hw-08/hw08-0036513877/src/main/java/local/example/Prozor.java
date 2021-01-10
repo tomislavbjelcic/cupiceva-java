@@ -68,8 +68,8 @@ public class Prozor extends JFrame {
 
 			public LAbstractAction(ILocalizationProvider provider, String lng) {
 				super(provider);
-				this.lng = lng;
 				this.putLocalizedValue(Action.NAME, lng);
+				this.lng = lng;
 			}
 
 			@Override

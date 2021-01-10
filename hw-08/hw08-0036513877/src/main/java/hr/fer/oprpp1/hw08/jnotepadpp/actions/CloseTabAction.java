@@ -29,7 +29,7 @@ public class CloseTabAction extends JNotepadPPAction {
 		boolean saved = !associatedSingleDocModel.isModified();
 		if (!saved) {
 			String fileName = associatedSingleDocModel.getFileName();
-			String msg = String.format("%s \"%s\" %s.\n%s",
+			String msg = String.format("%s \"%s\" %s.\n%s?",
 					provider.getString("prompt_save_part1"),
 					fileName,
 					provider.getString("prompt_save_part2"),

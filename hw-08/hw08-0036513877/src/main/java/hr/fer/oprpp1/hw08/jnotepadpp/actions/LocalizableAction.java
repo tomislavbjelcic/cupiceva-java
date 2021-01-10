@@ -46,5 +46,4 @@ public abstract class LocalizableAction extends AbstractAction {
 		this.actionKeysToTranslationKeysMap.put(key, translationKey);
 	}
 	
-	
 }
