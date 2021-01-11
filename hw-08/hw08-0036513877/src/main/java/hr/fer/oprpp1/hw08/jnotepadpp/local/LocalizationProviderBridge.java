@@ -23,7 +23,9 @@ public class LocalizationProviderBridge extends AbstractLocalizationProvider {
 		provider.addLocalizationListener(singleListener);
 		//System.out.println("connected");
 		String providerLang = provider.getCurrentLanguage();
-		if (!Objects.equals(providerLang, lastKnownLanguage))
+		String oldLang = lastKnownLanguage;
+		lastKnownLanguage = providerLang;
+		if (!Objects.equals(providerLang, oldLang))
 			fire();
 	}
 	

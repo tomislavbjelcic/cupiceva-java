@@ -2,7 +2,9 @@ package hr.fer.oprpp1.hw08.jnotepadpp.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.function.UnaryOperator;
 
 import javax.swing.Action;
 import javax.swing.JFrame;
@@ -21,7 +23,7 @@ public class Clipboard {
 	
 	@FunctionalInterface
 	private interface DocumentAction {
-		void perform(int off, int len, Document doc);
+		void perform(int off, int len, Document doc, UnaryOperator<String> caseChanger);
 	}
 	
 	private String clipboard = null;
@@ -32,15 +34,23 @@ public class Clipboard {
 	private Action cutAction;
 	private Action copyAction;
 	private Action pasteAction;
+	private Action changeCaseAction;
+	private Action toLowerCaseAction;
+	private Action toUpperCaseAction;
+	private Action invertCaseAction;
 	
-	private abstract class CopyCutPasteAction extends JNotepadPPAction {
+	private Action[] highlightDependentActions;
+	
+	private abstract class ChangeDocumentAction extends JNotepadPPAction {
 		
 		DocumentAction da;
+		UnaryOperator<String> caseChanger;
 		
-		public CopyCutPasteAction(JFrame frame, ILocalizationProvider provider, MultipleDocumentModel multiDocModel, 
-				DocumentAction da) {
+		public ChangeDocumentAction(JFrame frame, ILocalizationProvider provider, MultipleDocumentModel multiDocModel, 
+				DocumentAction da, UnaryOperator<String> caseChanger) {
 			super(frame, provider, multiDocModel);
 			this.da = da;
+			this.caseChanger = caseChanger;
 		}
 		
 		@Override
@@ -51,21 +61,44 @@ public class Clipboard {
 			int mark = caret.getMark();
 			int len = Math.abs(dot - mark);
 			int off = Math.min(dot, mark);
-			da.perform(off, len, document);
+			da.perform(off, len, document, caseChanger);
 		}
 	}
 	
+	private UnaryOperator<String> transformToLowercase
+		= s -> s.toLowerCase(new Locale(provider.getCurrentLanguage()));
+	private UnaryOperator<String> transformToUppercase
+		= s -> s.toUpperCase(new Locale(provider.getCurrentLanguage()));
+	private UnaryOperator<String> transformToInvertCase = s -> {
+		char[] chars = s.toCharArray();
+		int clen = chars.length;
+		StringBuilder sb = new StringBuilder(clen);
+		Locale l = new Locale(provider.getCurrentLanguage());
+		for (int i=0; i<clen; i++) {
+			char ch = chars[i];
+			String chstr = String.valueOf(ch);
+			String chstrinv = null;
+			if (Character.isLowerCase(ch))
+				chstrinv = chstr.toUpperCase(l);
+			else if (Character.isUpperCase(ch))
+				chstrinv = chstr.toLowerCase(l);
+			else
+				chstrinv = chstr;
+			chars[i] = chstrinv.charAt(0);
+		}
+		return new String(chars);
+	};
+		
 	private CaretListener cl = e -> {
 		Caret caret = caret();
 		int dot = caret.getDot();
 		int mark = caret.getMark();
 		int len = Math.abs(dot - mark);
 		boolean enable = len > 0;
-		copyAction.setEnabled(enable);
-		cutAction.setEnabled(enable);
+		toggleHighlightDependentAction(enable);
 	};
 	
-	private DocumentAction x = (off, len, doc) -> {
+	private DocumentAction cut = (off, len, doc, caseChanger) -> {
 		try {
 			clipboard = doc.getText(off, len);
 			doc.remove(off, len);
@@ -74,7 +107,7 @@ public class Clipboard {
 		}
 		pasteAction.setEnabled(true);
 	};
-	private DocumentAction c = (off, len, doc) -> {
+	private DocumentAction copy = (off, len, doc, caseChanger) -> {
 		try {
 			clipboard = doc.getText(off, len);
 		} catch (BadLocationException e1) {
@@ -82,12 +115,25 @@ public class Clipboard {
 		}
 		pasteAction.setEnabled(true);
 	};
-	private DocumentAction v = (off, len, doc) -> {
+	private DocumentAction paste = (off, len, doc, caseChanger) -> {
 		try {
 			doc.remove(off, len);
 			doc.insertString(off, clipboard, null);
 		} catch (BadLocationException e1) {
 			e1.printStackTrace();
+		}
+	};
+	private DocumentAction changeCase = (off, len, doc, caseChanger) -> {
+		try {
+			String highlighted = doc.getText(off, len);
+			String lang = provider.getCurrentLanguage();
+			Locale l = new Locale(lang);
+			String caseChangedStr = caseChanger.apply(highlighted);
+			doc.remove(off, len);
+			doc.insertString(off, caseChangedStr, null);
+		} catch (BadLocationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	};
 	
@@ -101,8 +147,7 @@ public class Clipboard {
 	
 	private void updateActions(SingleDocumentModel currentModel) {
 		if (currentModel == null) {
-			cutAction.setEnabled(false);
-			copyAction.setEnabled(false);
+			toggleHighlightDependentAction(false);
 			pasteAction.setEnabled(false);
 			return;
 		}
@@ -122,9 +167,14 @@ public class Clipboard {
 	private Document document() {
 		return textComponent().getDocument();
 	}
+	
+	private void toggleHighlightDependentAction(boolean enable) {
+		for (Action ac : highlightDependentActions)
+			ac.setEnabled(enable);
+	}
 
 	private void initActions() {
-		cutAction = new CopyCutPasteAction(frame, provider, multiDocModel, x) {
+		cutAction = new ChangeDocumentAction(frame, provider, multiDocModel, cut, null) {
 			@Override
 			protected void initAction() {
 				this.putLocalizedValue(Action.NAME, "ac_name_cut");
@@ -134,7 +184,7 @@ public class Clipboard {
 			}
 		};
 		
-		copyAction = new CopyCutPasteAction(frame, provider, multiDocModel, c) {
+		copyAction = new ChangeDocumentAction(frame, provider, multiDocModel, copy, null) {
 			@Override
 			protected void initAction() {
 				this.putLocalizedValue(Action.NAME, "ac_name_copy");
@@ -144,7 +194,7 @@ public class Clipboard {
 			}
 		};
 		
-		pasteAction = new CopyCutPasteAction(frame, provider, multiDocModel, v) {
+		pasteAction = new ChangeDocumentAction(frame, provider, multiDocModel, paste, null) {
 			@Override
 			protected void initAction() {
 				this.putLocalizedValue(Action.NAME, "ac_name_paste");
@@ -153,6 +203,51 @@ public class Clipboard {
 				this.setEnabled(false);
 			}
 		};
+		
+		changeCaseAction = new ChangeDocumentAction(frame, provider, multiDocModel, null, null) {
+			
+			@Override
+			protected void initAction() {
+				this.putLocalizedValue(Action.NAME, "change_case");
+				this.setEnabled(false);
+			}
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {}
+		};
+		
+		toLowerCaseAction = new ChangeDocumentAction(frame, provider, multiDocModel, changeCase, transformToLowercase) {
+			@Override
+			protected void initAction() {
+				this.putLocalizedValue(Action.NAME, "ac_name_tolowercase");
+				this.putLocalizedValue(Action.SHORT_DESCRIPTION, "ac_desc_tolowercase");
+				this.setEnabled(false);
+			}
+		};
+		
+		toUpperCaseAction = new ChangeDocumentAction(frame, provider, multiDocModel, changeCase, transformToUppercase) {
+			
+			@Override
+			protected void initAction() {
+				this.putLocalizedValue(Action.NAME, "ac_name_touppercase");
+				this.putLocalizedValue(Action.SHORT_DESCRIPTION, "ac_desc_touppercase");
+				this.setEnabled(false);
+			}
+		};
+		
+		invertCaseAction = new ChangeDocumentAction(frame, provider, multiDocModel, changeCase, transformToInvertCase) {
+			
+			@Override
+			protected void initAction() {
+				this.putLocalizedValue(Action.NAME, "ac_name_invertcase");
+				this.putLocalizedValue(Action.SHORT_DESCRIPTION, "ac_desc_invertcase");
+				this.setEnabled(false);
+			}
+		};
+		
+		highlightDependentActions = new Action[]
+				{cutAction, copyAction, changeCaseAction, 
+						toLowerCaseAction, toUpperCaseAction, invertCaseAction};
 		
 		multiDocModel.addMultipleDocumentListener(new MultipleDocumentAdapter() {
 			@Override
@@ -178,8 +273,20 @@ public class Clipboard {
 		return pasteAction;
 	}
 	
-	
+	public Action getToLowerCaseAction() {
+		return toLowerCaseAction;
+	}
 
+	public Action getChangeCaseAction() {
+		return changeCaseAction;
+	}
 	
+	public Action getToUpperCaseAction() {
+		return toUpperCaseAction;
+	}
+	
+	public Action getInvertCaseAction() {
+		return invertCaseAction;
+	}
 
 }

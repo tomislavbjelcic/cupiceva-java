@@ -7,6 +7,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.Action;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -53,7 +54,19 @@ public class JNotepadPP extends JFrame {
 	
 	private static final String[] languages = {"en", "hr"};
 	
-	private JToolBar toolBar;
+	private Clipboard clipboard;
+	
+	private static class MenuAction extends LocalizableAction {
+		
+		public MenuAction(ILocalizationProvider provider, String nameKey) {
+			super(provider);
+			this.putLocalizedValue(Action.NAME, nameKey);
+		}
+		@Override
+		public void actionPerformed(ActionEvent e) {}
+		
+		
+	}
 	
 	public JNotepadPP() {
 		flp = new FormLocalizationProvider(lp, this);
@@ -88,55 +101,7 @@ public class JNotepadPP extends JFrame {
 		
 		this.createActions();
 		this.createMenus();
-		
-		/*
-		JPanel panel = new JPanel();
-		JButton remTabBtn = new JButton("Ukloni");
-		JTextField tf = new JTextField();
-		Dimension tfpref = tf.getPreferredSize();
-		tfpref.width = 50;
-		tf.setPreferredSize(tfpref);
-		panel.add(tf); panel.add(remTabBtn);
-		cp.add(panel, BorderLayout.PAGE_START);
-		
-		
-		DefaultMultipleDocumentModel paneModel = new DefaultMultipleDocumentModel(flp);
-		MultipleDocumentModel model = paneModel;
-		model.addMultipleDocumentListener(new MultipleDocumentListener() {
-
-			@Override
-			public void currentDocumentChanged(SingleDocumentModel previousModel, SingleDocumentModel currentModel) {
-				System.out.println("cdc");
-			}
-
-			@Override
-			public void documentAdded(SingleDocumentModel model) {
-				System.out.println("docAdded");
-			}
-
-			@Override
-			public void documentRemoved(SingleDocumentModel model) {
-				System.out.println("docRemoved");
-			}
-			
-		});
-		
-		cp.add(paneModel, BorderLayout.CENTER);
-		
-		remTabBtn.addActionListener(e -> {
-			String input = tf.getText();
-			if (input.isBlank()) {
-				System.out.println("Blank input");
-				return;
-			}
-			int idx = Integer.parseInt(input);
-			SingleDocumentModel doc = model.getDocument(idx);
-			model.closeDocument(doc);
-		});
-		
-		JButton addTabBtn = new JButton(new CreateNewDocumentAction(this, flp, model));
-		cp.add(addTabBtn, BorderLayout.PAGE_END);
-		*/
+		this.createToolBar();
 		
 	}
 	
@@ -152,17 +117,6 @@ public class JNotepadPP extends JFrame {
 	
 	private void createMenus() {
 		JMenuBar menuBar = new JMenuBar();
-		class MenuAction extends LocalizableAction {
-			
-			public MenuAction(ILocalizationProvider provider, String nameKey) {
-				super(provider);
-				this.putLocalizedValue(Action.NAME, nameKey);
-			}
-			@Override
-			public void actionPerformed(ActionEvent e) {}
-			
-			
-		}
 
 		JMenu fileMenu = new JMenu(new MenuAction(flp, "file"));
 		menuBar.add(fileMenu);
@@ -178,7 +132,7 @@ public class JNotepadPP extends JFrame {
 		
 		JMenu editMenu = new JMenu(new MenuAction(flp, "edit"));
 		menuBar.add(editMenu);
-		Clipboard clipboard = new Clipboard(this, flp, model);
+		clipboard = new Clipboard(this, flp, model);
 		editMenu.add(new JMenuItem(clipboard.getCopyAction()));
 		editMenu.add(new JMenuItem(clipboard.getCutAction()));
 		editMenu.add(new JMenuItem(clipboard.getPasteAction()));
@@ -186,12 +140,17 @@ public class JNotepadPP extends JFrame {
 		JMenu toolsMenu = new JMenu(new MenuAction(flp, "tools"));
 		menuBar.add(toolsMenu);
 		toolsMenu.add(new JMenuItem(statInfoAction));
+		JMenu changeCaseSubMenu = new JMenu(clipboard.getChangeCaseAction());
+		changeCaseSubMenu.add(new JMenuItem(clipboard.getToLowerCaseAction()));
+		changeCaseSubMenu.add(new JMenuItem(clipboard.getToUpperCaseAction()));
+		changeCaseSubMenu.add(new JMenuItem(clipboard.getInvertCaseAction()));
+		toolsMenu.add(changeCaseSubMenu);
 		
 		JMenu langMenu = new JMenu(new MenuAction(flp, "language"));
 		menuBar.add(langMenu);
 		for (String lang : languages)
 			langMenu.add(new JMenuItem(new LanguageChangeAction(flp, lp, lang)));
-
+		
 		this.setJMenuBar(menuBar);
 	}
 	
@@ -199,8 +158,27 @@ public class JNotepadPP extends JFrame {
 		return saveAction;
 	}
 	
-	private void createToolBars() {
+	private void createToolBar() {
+		JToolBar toolBar = new JToolBar();
+		toolBar.setFloatable(true);
 		
+		toolBar.add(new JButton(newDocAction));
+		toolBar.add(new JButton(openAction));
+		toolBar.addSeparator();
+		toolBar.add(new JButton(saveAction));
+		toolBar.add(new JButton(saveAsAction));
+		toolBar.addSeparator();
+		toolBar.add(new JButton(closeAction));
+		toolBar.addSeparator();
+		toolBar.add(new JButton(clipboard.getCopyAction()));
+		toolBar.add(new JButton(clipboard.getCutAction()));
+		toolBar.add(new JButton(clipboard.getPasteAction()));
+		toolBar.addSeparator();
+		toolBar.add(new JButton(statInfoAction));
+		toolBar.add(new JButton(quitAction));
+		
+		Container cp = this.getContentPane();
+		cp.add(toolBar, BorderLayout.PAGE_START);
 	}
 	
 	public static void main(String[] args) {
