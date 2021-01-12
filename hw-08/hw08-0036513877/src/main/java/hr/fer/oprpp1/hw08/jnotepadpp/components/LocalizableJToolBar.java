@@ -12,10 +12,8 @@ public class LocalizableJToolBar extends JToolBar {
 	private String titleKey;
 	private ILocalizationProvider provider;
 	private ILocalizationListener listener = () -> {
-		setName(provider.getString(titleKey));
-		System.out.println("a");
-		
-		repaint();
+		String newName = provider.getString(titleKey);
+		setName(newName);
 	};
 	
 	public LocalizableJToolBar(ILocalizationProvider provider, String titleKey) {

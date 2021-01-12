@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
@@ -27,6 +28,7 @@ import hr.fer.oprpp1.hw08.jnotepadpp.actions.SaveAsDocumentAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.SaveDocumentAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.StatisticalInfoAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.components.LocalizableJToolBar;
+import hr.fer.oprpp1.hw08.jnotepadpp.components.StatusBar;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.FormLocalizationProvider;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.ILocalizationProvider;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizationProvider;
@@ -105,13 +107,27 @@ public class JNotepadPP extends JFrame {
 		};
 		mdl.currentDocumentChanged(null, null);
 		this.model.addMultipleDocumentListener(mdl);
+		StatusBar statusBar = new StatusBar(flp, model);
 		this.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowOpened(WindowEvent e) {
+				statusBar.startClock();
+			}
+			
+			@Override
+			public void windowClosed(WindowEvent e) {
+				statusBar.stopClock();
+			}
+			
 			@Override
 			public void windowClosing(WindowEvent e) {
 				quitAction.actionPerformed(null);
 			}
 		});
-		cp.add(jTabbedPane, BorderLayout.CENTER);
+		JPanel centerPnl = new JPanel(new BorderLayout());
+		centerPnl.add(jTabbedPane, BorderLayout.CENTER);
+		centerPnl.add(statusBar, BorderLayout.PAGE_END);
+		cp.add(centerPnl, BorderLayout.CENTER);
 		
 		this.createActions();
 		this.createMenus();
@@ -178,7 +194,7 @@ public class JNotepadPP extends JFrame {
 	}
 	
 	private void createToolBar() {
-		JToolBar toolBar = new LocalizableJToolBar(flp, "tools");
+		JToolBar toolBar = new LocalizableJToolBar(flp, "toolbar");
 		toolBar.setFloatable(true);
 		
 		toolBar.add(new JButton(newDocAction));
@@ -199,6 +215,7 @@ public class JNotepadPP extends JFrame {
 		Container cp = this.getContentPane();
 		cp.add(toolBar, BorderLayout.PAGE_START);
 	}
+	
 	
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(() -> {
