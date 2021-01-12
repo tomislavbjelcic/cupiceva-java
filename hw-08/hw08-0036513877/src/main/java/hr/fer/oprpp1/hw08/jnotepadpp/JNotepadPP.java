@@ -13,6 +13,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
@@ -56,6 +57,8 @@ public class JNotepadPP extends JFrame {
 	
 	private Action statInfoAction;
 	
+	private JTabbedPane jTabbedPane;
+	
 	
 	private static final String[] languages = {"en", "hr"};
 	
@@ -93,8 +96,9 @@ public class JNotepadPP extends JFrame {
 		Container cp = this.getContentPane();
 		cp.setLayout(new BorderLayout());
 		
-		DefaultMultipleDocumentModel jTabbedPane = new DefaultMultipleDocumentModel(this, flp);
-		this.model = jTabbedPane;
+		DefaultMultipleDocumentModel defaultModel = new DefaultMultipleDocumentModel(this, flp);
+		this.model = defaultModel;
+		this.jTabbedPane = defaultModel;
 		MultipleDocumentListener mdl = new MultipleDocumentAdapter() {
 			@Override
 			public void currentDocumentChanged(SingleDocumentModel previousModel, SingleDocumentModel currentModel) {
@@ -191,6 +195,10 @@ public class JNotepadPP extends JFrame {
 	
 	public Action getSaveAction() {
 		return saveAction;
+	}
+	
+	public JTabbedPane getJTabbedPane() {
+		return jTabbedPane;
 	}
 	
 	private void createToolBar() {

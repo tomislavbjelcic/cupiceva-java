@@ -77,7 +77,7 @@ public class StatusBar extends JPanel {
 	
 	private void initLayout() {
 		this.setLayout(new GridLayout(1, 3));
-		Border b = BorderFactory.createMatteBorder(3, 0, 0, 0, Color.GRAY);
+		Border b = BorderFactory.createMatteBorder(3, 1, 0, 1, Color.GRAY);
 		this.setBorder(b);
 		
 		lengthLabel.setHorizontalAlignment(SwingConstants.LEFT);
@@ -87,7 +87,7 @@ public class StatusBar extends JPanel {
 		lnColSelPanel.add(lnLabel);
 		lnColSelPanel.add(colLabel);
 		lnColSelPanel.add(selLabel);
-		Border middleCompBorder = BorderFactory.createMatteBorder(0, 1, 0, 1, Color.RED);
+		Border middleCompBorder = BorderFactory.createMatteBorder(0, 1, 0, 1, Color.LIGHT_GRAY);
 		lnColSelPanel.setBorder(middleCompBorder);
 		this.add(lnColSelPanel);
 		
