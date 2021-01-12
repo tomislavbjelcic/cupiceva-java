@@ -2,9 +2,12 @@ package hr.fer.oprpp1.hw08.jnotepadpp.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.text.Collator;
+import java.util.Comparator;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 import javax.swing.Action;
 import javax.swing.JFrame;
@@ -12,6 +15,7 @@ import javax.swing.event.CaretListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
 import javax.swing.text.Document;
+import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
 
 import hr.fer.oprpp1.hw08.jnotepadpp.local.ILocalizationProvider;
@@ -19,11 +23,11 @@ import hr.fer.oprpp1.hw08.jnotepadpp.models.MultipleDocumentAdapter;
 import hr.fer.oprpp1.hw08.jnotepadpp.models.MultipleDocumentModel;
 import hr.fer.oprpp1.hw08.jnotepadpp.models.SingleDocumentModel;
 
-public class Clipboard {
+public class HighlightBasedActions {
 	
 	@FunctionalInterface
 	private interface DocumentAction {
-		void perform(int off, int len, Document doc, UnaryOperator<String> caseChanger);
+		void perform(int off, int len, Document doc, UnaryOperator<String> selectedTextChanger);
 	}
 	
 	private String clipboard = null;
@@ -38,19 +42,23 @@ public class Clipboard {
 	private Action toLowerCaseAction;
 	private Action toUpperCaseAction;
 	private Action invertCaseAction;
+	private Action sortLinesAction;
+	private Action sortLinesAscendingAction;
+	private Action sortLinesDescendingAction;
+	private Action uniqueLinesAction;
 	
 	private Action[] highlightDependentActions;
 	
 	private abstract class ChangeDocumentAction extends JNotepadPPAction {
 		
 		DocumentAction da;
-		UnaryOperator<String> caseChanger;
+		UnaryOperator<String> selectedTextChanger;
 		
 		public ChangeDocumentAction(JFrame frame, ILocalizationProvider provider, MultipleDocumentModel multiDocModel, 
-				DocumentAction da, UnaryOperator<String> caseChanger) {
+				DocumentAction da, UnaryOperator<String> selectedTextChanger) {
 			super(frame, provider, multiDocModel);
 			this.da = da;
-			this.caseChanger = caseChanger;
+			this.selectedTextChanger = selectedTextChanger;
 		}
 		
 		@Override
@@ -61,7 +69,7 @@ public class Clipboard {
 			int mark = caret.getMark();
 			int len = Math.abs(dot - mark);
 			int off = Math.min(dot, mark);
-			da.perform(off, len, document, caseChanger);
+			da.perform(off, len, document, selectedTextChanger);
 		}
 	}
 	
@@ -88,6 +96,19 @@ public class Clipboard {
 		}
 		return new String(chars);
 	};
+	private UnaryOperator<String> ascOrderSort = s -> {
+		Locale l = new Locale(provider.getCurrentLanguage());
+		Comparator<Object> comp = Collator.getInstance(l);
+		return s.lines().sorted(comp).collect(Collectors.joining("\n", "", "\n"));
+	};
+	private UnaryOperator<String> descOrderSort = s -> {
+		Locale l = new Locale(provider.getCurrentLanguage());
+		Comparator<Object> comp = Collator.getInstance(l).reversed();
+		return s.lines().sorted(comp).collect(Collectors.joining("\n", "", "\n"));
+	};
+	private UnaryOperator<String> unique = s -> {
+		return s.lines().distinct().collect(Collectors.joining("\n", "", "\n"));
+	};
 		
 	private CaretListener cl = e -> {
 		Caret caret = caret();
@@ -98,7 +119,7 @@ public class Clipboard {
 		toggleHighlightDependentAction(enable);
 	};
 	
-	private DocumentAction cut = (off, len, doc, caseChanger) -> {
+	private DocumentAction cut = (off, len, doc, selectedTextChanger) -> {
 		try {
 			clipboard = doc.getText(off, len);
 			doc.remove(off, len);
@@ -107,7 +128,7 @@ public class Clipboard {
 		}
 		pasteAction.setEnabled(true);
 	};
-	private DocumentAction copy = (off, len, doc, caseChanger) -> {
+	private DocumentAction copy = (off, len, doc, selectedTextChanger) -> {
 		try {
 			clipboard = doc.getText(off, len);
 		} catch (BadLocationException e1) {
@@ -115,7 +136,7 @@ public class Clipboard {
 		}
 		pasteAction.setEnabled(true);
 	};
-	private DocumentAction paste = (off, len, doc, caseChanger) -> {
+	private DocumentAction paste = (off, len, doc, selectedTextChanger) -> {
 		try {
 			doc.remove(off, len);
 			doc.insertString(off, clipboard, null);
@@ -123,14 +144,39 @@ public class Clipboard {
 			e1.printStackTrace();
 		}
 	};
-	private DocumentAction changeCase = (off, len, doc, caseChanger) -> {
+	private DocumentAction changeCase = (off, len, doc, selectedTextChanger) -> {
 		try {
 			String highlighted = doc.getText(off, len);
 			String lang = provider.getCurrentLanguage();
 			Locale l = new Locale(lang);
-			String caseChangedStr = caseChanger.apply(highlighted);
+			String caseChangedStr = selectedTextChanger.apply(highlighted);
 			doc.remove(off, len);
 			doc.insertString(off, caseChangedStr, null);
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
+	};
+	private DocumentAction changeLines = (off, len, doc, selectedTextChanger) -> {
+		Element root = doc.getDefaultRootElement();
+		int startRow = root.getElementIndex(off);
+		int endRow = root.getElementIndex(off + len);
+		if (endRow == root.getElementCount() - 1) {
+			try {
+				doc.insertString(doc.getLength(), "\n", null);
+			} catch (BadLocationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		int startRowOffset = root.getElement(startRow).getStartOffset();
+		int endRowOffset = root.getElement(endRow).getEndOffset();
+		int linesLen = endRowOffset - startRowOffset;
+		String linesStr = null;
+		try {
+			linesStr = doc.getText(startRowOffset, linesLen);
+			doc.remove(startRowOffset, linesLen);
+			String sortedLinesStr = selectedTextChanger.apply(linesStr);
+			doc.insertString(startRowOffset, sortedLinesStr, null);
 		} catch (BadLocationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -138,7 +184,7 @@ public class Clipboard {
 	};
 	
 
-	public Clipboard(JFrame frame, ILocalizationProvider provider, MultipleDocumentModel multiDocModel) {
+	public HighlightBasedActions(JFrame frame, ILocalizationProvider provider, MultipleDocumentModel multiDocModel) {
 		this.frame = Objects.requireNonNull(frame);
 		this.provider = Objects.requireNonNull(provider);
 		this.multiDocModel = Objects.requireNonNull(multiDocModel);
@@ -245,9 +291,55 @@ public class Clipboard {
 			}
 		};
 		
+		sortLinesAction = new ChangeDocumentAction(frame, provider, multiDocModel, null, null) {
+			
+			@Override
+			protected void initAction() {
+				this.putLocalizedValue(Action.NAME, "sort_lines");
+				this.setEnabled(false);
+			}
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {}
+		};
+		
+		sortLinesAscendingAction = new ChangeDocumentAction(frame, provider, multiDocModel, changeLines, ascOrderSort) {
+			
+			@Override
+			protected void initAction() {
+				this.putLocalizedValue(Action.NAME, "ac_name_sort_lines_asc");
+				this.putLocalizedValue(Action.SHORT_DESCRIPTION, "ac_desc_sort_lines_asc");
+				this.setEnabled(false);
+			}
+			
+		};
+
+		sortLinesDescendingAction = new ChangeDocumentAction(frame, provider, multiDocModel, changeLines, descOrderSort) {
+
+			@Override
+			protected void initAction() {
+				this.putLocalizedValue(Action.NAME, "ac_name_sort_lines_desc");
+				this.putLocalizedValue(Action.SHORT_DESCRIPTION, "ac_desc_sort_lines_desc");
+				this.setEnabled(false);
+			}
+
+		};
+		
+		uniqueLinesAction = new ChangeDocumentAction(frame, provider, multiDocModel, changeLines, unique) {
+			
+			@Override
+			protected void initAction() {
+				this.putLocalizedValue(Action.NAME, "ac_name_unique_lines");
+				this.putLocalizedValue(Action.SHORT_DESCRIPTION, "ac_desc_unique_lines");
+				this.setEnabled(false);
+			}
+			
+		};
+		
 		highlightDependentActions = new Action[]
 				{cutAction, copyAction, changeCaseAction, 
-						toLowerCaseAction, toUpperCaseAction, invertCaseAction};
+						toLowerCaseAction, toUpperCaseAction, invertCaseAction, sortLinesAction, sortLinesAction,
+						sortLinesAscendingAction, sortLinesDescendingAction, uniqueLinesAction};
 		
 		multiDocModel.addMultipleDocumentListener(new MultipleDocumentAdapter() {
 			@Override
@@ -287,6 +379,22 @@ public class Clipboard {
 	
 	public Action getInvertCaseAction() {
 		return invertCaseAction;
+	}
+	
+	public Action getSortLinesAction() {
+		return sortLinesAction;
+	}
+	
+	public Action getSortLinesAscendingAction() {
+		return sortLinesAscendingAction;
+	}
+	
+	public Action getSortLinesDescendingAction() {
+		return sortLinesDescendingAction;
+	}
+	
+	public Action getUniqueLinesAction() {
+		return uniqueLinesAction;
 	}
 
 }

@@ -16,9 +16,9 @@ import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
-import hr.fer.oprpp1.hw08.jnotepadpp.actions.Clipboard;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.CloseDocumentAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.CreateNewDocumentAction;
+import hr.fer.oprpp1.hw08.jnotepadpp.actions.HighlightBasedActions;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.LanguageChangeAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.LocalizableAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.OpenDocumentAction;
@@ -26,6 +26,7 @@ import hr.fer.oprpp1.hw08.jnotepadpp.actions.QuitAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.SaveAsDocumentAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.SaveDocumentAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.actions.StatisticalInfoAction;
+import hr.fer.oprpp1.hw08.jnotepadpp.components.LocalizableJToolBar;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.FormLocalizationProvider;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.ILocalizationProvider;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizationProvider;
@@ -33,6 +34,8 @@ import hr.fer.oprpp1.hw08.jnotepadpp.models.DefaultMultipleDocumentModel;
 import hr.fer.oprpp1.hw08.jnotepadpp.models.MultipleDocumentAdapter;
 import hr.fer.oprpp1.hw08.jnotepadpp.models.MultipleDocumentListener;
 import hr.fer.oprpp1.hw08.jnotepadpp.models.MultipleDocumentModel;
+import hr.fer.oprpp1.hw08.jnotepadpp.models.SingleDocumentAdapter;
+import hr.fer.oprpp1.hw08.jnotepadpp.models.SingleDocumentListener;
 import hr.fer.oprpp1.hw08.jnotepadpp.models.SingleDocumentModel;
 
 public class JNotepadPP extends JFrame {
@@ -54,7 +57,15 @@ public class JNotepadPP extends JFrame {
 	
 	private static final String[] languages = {"en", "hr"};
 	
-	private Clipboard clipboard;
+	private HighlightBasedActions hlba;
+	private SingleDocumentListener titleChanger = new SingleDocumentAdapter() {
+		@Override
+		public void documentFilePathUpdated(SingleDocumentModel model) {
+			String title = model == null ? APP_NAME :
+				(model.getFullPathString() + " - " + APP_NAME);
+			JNotepadPP.this.setTitle(title);
+		};
+	};
 	
 	private static class MenuAction extends LocalizableAction {
 		
@@ -72,6 +83,7 @@ public class JNotepadPP extends JFrame {
 		flp = new FormLocalizationProvider(lp, this);
 		this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		this.setSize(1000, 700);
+		this.setLocationRelativeTo(null);
 		this.initGUI();
 	}
 	
@@ -84,9 +96,11 @@ public class JNotepadPP extends JFrame {
 		MultipleDocumentListener mdl = new MultipleDocumentAdapter() {
 			@Override
 			public void currentDocumentChanged(SingleDocumentModel previousModel, SingleDocumentModel currentModel) {
-				String title = currentModel == null ? APP_NAME :
-					(currentModel.getFullPathString() + " - " + APP_NAME);
-				JNotepadPP.this.setTitle(title);
+				if (previousModel != null)
+					previousModel.removeSingleDocumentListener(titleChanger);
+				if (currentModel != null)
+					currentModel.addSingleDocumentListener(titleChanger);
+				titleChanger.documentFilePathUpdated(currentModel);
 			}
 		};
 		mdl.currentDocumentChanged(null, null);
@@ -132,19 +146,24 @@ public class JNotepadPP extends JFrame {
 		
 		JMenu editMenu = new JMenu(new MenuAction(flp, "edit"));
 		menuBar.add(editMenu);
-		clipboard = new Clipboard(this, flp, model);
-		editMenu.add(new JMenuItem(clipboard.getCopyAction()));
-		editMenu.add(new JMenuItem(clipboard.getCutAction()));
-		editMenu.add(new JMenuItem(clipboard.getPasteAction()));
+		hlba = new HighlightBasedActions(this, flp, model);
+		editMenu.add(new JMenuItem(hlba.getCopyAction()));
+		editMenu.add(new JMenuItem(hlba.getCutAction()));
+		editMenu.add(new JMenuItem(hlba.getPasteAction()));
 		
 		JMenu toolsMenu = new JMenu(new MenuAction(flp, "tools"));
 		menuBar.add(toolsMenu);
 		toolsMenu.add(new JMenuItem(statInfoAction));
-		JMenu changeCaseSubMenu = new JMenu(clipboard.getChangeCaseAction());
-		changeCaseSubMenu.add(new JMenuItem(clipboard.getToLowerCaseAction()));
-		changeCaseSubMenu.add(new JMenuItem(clipboard.getToUpperCaseAction()));
-		changeCaseSubMenu.add(new JMenuItem(clipboard.getInvertCaseAction()));
+		JMenu changeCaseSubMenu = new JMenu(hlba.getChangeCaseAction());
+		changeCaseSubMenu.add(new JMenuItem(hlba.getToLowerCaseAction()));
+		changeCaseSubMenu.add(new JMenuItem(hlba.getToUpperCaseAction()));
+		changeCaseSubMenu.add(new JMenuItem(hlba.getInvertCaseAction()));
 		toolsMenu.add(changeCaseSubMenu);
+		JMenu sortMenu = new JMenu(hlba.getSortLinesAction());
+		sortMenu.add(new JMenuItem(hlba.getSortLinesAscendingAction()));
+		sortMenu.add(new JMenuItem(hlba.getSortLinesDescendingAction()));
+		toolsMenu.add(sortMenu);
+		toolsMenu.add(new JMenuItem(hlba.getUniqueLinesAction()));
 		
 		JMenu langMenu = new JMenu(new MenuAction(flp, "language"));
 		menuBar.add(langMenu);
@@ -159,7 +178,7 @@ public class JNotepadPP extends JFrame {
 	}
 	
 	private void createToolBar() {
-		JToolBar toolBar = new JToolBar();
+		JToolBar toolBar = new LocalizableJToolBar(flp, "tools");
 		toolBar.setFloatable(true);
 		
 		toolBar.add(new JButton(newDocAction));
@@ -170,9 +189,9 @@ public class JNotepadPP extends JFrame {
 		toolBar.addSeparator();
 		toolBar.add(new JButton(closeAction));
 		toolBar.addSeparator();
-		toolBar.add(new JButton(clipboard.getCopyAction()));
-		toolBar.add(new JButton(clipboard.getCutAction()));
-		toolBar.add(new JButton(clipboard.getPasteAction()));
+		toolBar.add(new JButton(hlba.getCopyAction()));
+		toolBar.add(new JButton(hlba.getCutAction()));
+		toolBar.add(new JButton(hlba.getPasteAction()));
 		toolBar.addSeparator();
 		toolBar.add(new JButton(statInfoAction));
 		toolBar.add(new JButton(quitAction));

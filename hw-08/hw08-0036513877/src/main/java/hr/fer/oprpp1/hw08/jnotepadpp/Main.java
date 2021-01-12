@@ -1,28 +1,15 @@
 package hr.fer.oprpp1.hw08.jnotepadpp;
 
-class A {
-	void m() {
-		System.out.println("ma");
-	}
-}
-
-class B extends A {
-	@Override
-	void m() {
-		super.m();
-		System.out.println("mb");
-	}
-	
-	void lel() {
-		super.m();
-	}
-}
+import java.text.Collator;
+import java.util.Comparator;
+import java.util.Locale;
 
 public class Main {
 	
 	public static void main(String[] args) {
-		B b = new B();
-		b.lel();
+		Comparator<Object> cmp = Collator.getInstance(new Locale("hr"));
+		int r = cmp.compare("đešnjak", "kinja");
+		System.out.println(r);
 	}
 	
 }
