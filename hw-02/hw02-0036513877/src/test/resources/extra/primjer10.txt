@@ -1,0 +1,7 @@
+Some random \{text $}_.*.
+Wow quotation mark " how dare y\\ou!
+{$FOR _4Java"4.25"-8 "7"$}
+veoma {$= kul @ec_h0 "T\tA\t\"G\"" s4 3 mjesta odnosno "tri"$}
+ako {$= "ovo\nNe\nIsparsiras\rDobiti\t
+ces\tsvoje!"$}
+{$END$}
