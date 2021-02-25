@@ -87,7 +87,7 @@ public class JNotepadPP extends JFrame {
 	public JNotepadPP() {
 		flp = new FormLocalizationProvider(lp, this);
 		this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		this.setSize(1000, 700);
+		this.setSize(900, 600);
 		this.setLocationRelativeTo(null);
 		this.initGUI();
 	}
