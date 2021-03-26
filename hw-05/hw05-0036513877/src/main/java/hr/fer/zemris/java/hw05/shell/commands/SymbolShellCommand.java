@@ -50,7 +50,7 @@ public class SymbolShellCommand extends AbstractShellCommand {
 			case "PROMPT" -> env.setPromptSymbol(newSym);
 			case "MORELINES" -> env.setMorelinesSymbol(newSym);
 			case "MULTILINE" -> env.setMultilineSymbol(newSym);
-		};
+		}
 		String wr = String.format("Symbol for %s changed from '%s' to '%s'",
 				alias, oldSym, newSym);
 		env.writeln(wr);
